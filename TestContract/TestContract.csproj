@@ -9,20 +9,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Contracts.Abstractions\Contracts.Abstractions.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
     <Compile Include="..\Compatibility\IsExternalInit.cs" Link="IsExternalInit.cs" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Staticsoft.Extensions.DependencyInjection" Version="1.0.0-1" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <PackageId>Staticsoft.$(MSBuildProjectName)</PackageId>
-    <VersionPrefix>1.0.0</VersionPrefix>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/Staticsoft/Contracts</RepositoryUrl>
-  </PropertyGroup>
 
 </Project>

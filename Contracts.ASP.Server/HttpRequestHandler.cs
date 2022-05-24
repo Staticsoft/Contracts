@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
-namespace Staticsoft.Contracts.ASP
+namespace Staticsoft.Contracts.ASP.Server
 {
     public interface HttpRequestHandler<TRequest, TResponse>
     {

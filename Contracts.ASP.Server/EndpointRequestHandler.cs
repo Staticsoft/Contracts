@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Staticsoft.Contracts.Abstractions;
 using Staticsoft.Serialization.Abstractions;
-using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Staticsoft.Contracts.ASP
+namespace Staticsoft.Contracts.ASP.Server
 {
     public class EndpointRequestHandler<TRequest, TResponse> : HttpRequestHandler<TRequest, TResponse>
     {
@@ -29,28 +27,28 @@ namespace Staticsoft.Contracts.ASP
             await WriteResponse(context, response);
         }
 
-        async Task WriteResponse(HttpContext context, TResponse response)
-        {
-            var responseText = Serializer.Serialize(response);
-            await context.Response.WriteAsync(responseText, Encoding.UTF8);
-        }
-
         async Task<TRequest> ReadRequest(HttpContext context)
         {
             using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             var requestText = await reader.ReadToEndAsync();
             return Serializer.Deserialize<TRequest>(requestText);
         }
+
+        async Task WriteResponse(HttpContext context, TResponse response)
+        {
+            var responseText = Serializer.Serialize(response);
+            await context.Response.WriteAsync(responseText, Encoding.UTF8);
+        }
     }
 
     public class EndpointRequestHandler : HttpRequestHandler
     {
-        readonly IServiceProvider Provider;
+        readonly HttpRequestHandlerFactory Factory;
 
-        public EndpointRequestHandler(IServiceProvider provider)
-            => Provider = provider;
+        public EndpointRequestHandler(HttpRequestHandlerFactory factory)
+            => Factory = factory;
 
         public Task Execute<TRequest, TResponse>(HttpContext context)
-            => Provider.GetRequiredService<HttpRequestHandler<TRequest, TResponse>>().Execute(context);
+            => Factory.Create<TRequest, TResponse>().Execute(context);
     }
 }

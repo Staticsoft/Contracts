@@ -1,5 +1,4 @@
-﻿using Staticsoft.HttpCommunication.Abstractions;
-using System;
+﻿using System;
 
 namespace Staticsoft.Contracts.ASP
 {
@@ -7,7 +6,7 @@ namespace Staticsoft.Contracts.ASP
 
     public interface HttpEndpointMetadata
     {
-        HttpMethod Method { get; }
+        T GetAttribute<T>() where T : Attribute;
         string Path { get; }
         Type RequestType { get; }
         Type ResponseType { get; }

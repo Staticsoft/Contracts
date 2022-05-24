@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net60;netcoreapp3.1</TargetFrameworks>
@@ -10,15 +10,25 @@
     <Compile Include="..\Compatibility\IsExternalInit.cs" Link="IsExternalInit.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Staticsoft.Extensions.DependencyInjection" Version="1.0.0-1" />
+    <PackageReference Include="Staticsoft.Serialization.Abstractions" Version="1.0.0-5" />
+    <PackageReference Include="Staticsoft.TryReturn" Version="1.0.0-5" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Contracts.ASP\Contracts.ASP.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <PackageId>Staticsoft.$(MSBuildProjectName)</PackageId>
     <VersionPrefix>1.0.0</VersionPrefix>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/Staticsoft/Contracts</RepositoryUrl>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Staticsoft.HttpCommunication.Abstractions" Version="1.0.0-3" />
-  </ItemGroup>
 
 </Project>

@@ -29,6 +29,8 @@ namespace Staticsoft.Contracts.ASP.Server
 
         async Task<TRequest> ReadRequest(HttpContext context)
         {
+            if (typeof(TRequest) == typeof(EmptyRequest)) return (TRequest)(object)new EmptyRequest();
+
             using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             var requestText = await reader.ReadToEndAsync();
             return Serializer.Deserialize<TRequest>(requestText);

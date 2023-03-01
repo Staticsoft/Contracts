@@ -11,7 +11,8 @@ namespace Staticsoft.TestServer
     {
         public void ConfigureServices(IServiceCollection services) => services
             .UseServerAPI<TestAPI>(Assembly.GetExecutingAssembly())
-            .DecorateSingleton<HttpRequestHandler, AuthenticateRequestsDecorator>();
+            .DecorateSingleton<HttpRequestHandler, AuthenticateRequestsDecorator>()
+            .AddHttpContextAccessor();
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment _) => app
             .UseRouting()

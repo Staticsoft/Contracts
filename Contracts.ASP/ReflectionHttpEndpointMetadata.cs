@@ -27,7 +27,15 @@ namespace Staticsoft.Contracts.ASP
         static string GetPattern(ParameterInfo parameter, RequestType type)
             => $"/{parameter.Member.DeclaringType.Name}/{GetPatternRemainder(parameter, type)}";
 
-        static string GetPatternRemainder(ParameterInfo parameter, RequestType type) => type switch
+        static string GetPatternRemainder(ParameterInfo parameter, RequestType type)
+        {
+            var endpoint = parameter.GetCustomAttribute<EndpointAttribute>();
+            if (endpoint.Pattern != parameter.Name) return endpoint.Pattern;
+
+            return GetDefaultPatternRemainder(parameter, type);
+        }
+
+        static string GetDefaultPatternRemainder(ParameterInfo parameter, RequestType type) => type switch
         {
             RequestType.Static => parameter.Name,
             RequestType.Parametrized => "{parameter}",

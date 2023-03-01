@@ -22,6 +22,7 @@ namespace Staticsoft.Contracts.ASP.Server
             => services
                 .AddSingleton<HttpRequestHandler, EndpointRequestHandler>()
                 .AddSingleton<HttpEndpointFactory, DependencyInjectionHttpRequestHandlerFactory>()
+                .AddSingleton<ParametrizedHttpEndpointFactory, DependencyInjectionParametrizedHttpRequestHandlerFactory>()
                 .AddEndpoints<TAPI>(HttpEndpointMetadataAccessor.GetMetadata(typeof(TAPI)), assembly);
 
         static IServiceCollection AddEndpoints<TAPI>(this IServiceCollection services, IEnumerable<HttpEndpointMetadata> metadata, Assembly assembly)

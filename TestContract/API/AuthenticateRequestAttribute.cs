@@ -2,6 +2,6 @@
 
 namespace Staticsoft.TestContract
 {
-    [AttributeUsage(AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Property)]
     public class AuthenticateRequestAttribute : Attribute { }
 }

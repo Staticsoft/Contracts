@@ -5,12 +5,12 @@ namespace Staticsoft.TestContract
 {
     public class GroupWithSameEndpointName
     {
-        public readonly HttpEndpoint<OtherThanSameNameRequest, OtherThanSameNameResponse> SameNameEndpoint;
-
         public GroupWithSameEndpointName(
-            [Endpoint(HttpMethod.Post)]
             HttpEndpoint<OtherThanSameNameRequest, OtherThanSameNameResponse> sameNameEndpoint
         )
             => SameNameEndpoint = sameNameEndpoint;
+
+        [Endpoint(HttpMethod.Post)]
+        public HttpEndpoint<OtherThanSameNameRequest, OtherThanSameNameResponse> SameNameEndpoint { get; }
     }
 }

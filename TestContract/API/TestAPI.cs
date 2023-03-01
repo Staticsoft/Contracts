@@ -2,13 +2,13 @@
 {
     public class TestAPI
     {
-        public readonly TestAPIGroup TestGroup;
-        public readonly GroupWithSameEndpointName GroupWithSameEndpointName;
-
-        public TestAPI(TestAPIGroup testGroup, GroupWithSameEndpointName sameEndpointNameGroup)
+        public TestAPI(TestGroup testGroup, GroupWithSameEndpointName sameEndpointNameGroup)
         {
             TestGroup = testGroup;
             GroupWithSameEndpointName = sameEndpointNameGroup;
         }
+
+        public TestGroup TestGroup { get; }
+        public GroupWithSameEndpointName GroupWithSameEndpointName { get; }
     }
 }

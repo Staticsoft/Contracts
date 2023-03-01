@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Staticsoft.Contracts.Abstractions
 {
-    [AttributeUsage(AttributeTargets.Parameter)]
+    [AttributeUsage(AttributeTargets.Property)]
     public class EndpointAttribute : Attribute
     {
         public readonly HttpMethod Method;

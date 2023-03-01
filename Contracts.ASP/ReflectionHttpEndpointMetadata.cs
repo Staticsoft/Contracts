@@ -9,14 +9,14 @@ namespace Staticsoft.Contracts.ASP
         static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
 
         readonly ParameterInfo Parameter;
-        public string Path { get; }
+        public string Pattern { get; }
         public RequestType RequestType { get; }
 
         public ReflectionHttpEndpointMetadata(ParameterInfo parameter)
         {
             Parameter = parameter;
             RequestType = GetRequestType(parameter);
-            Path = GetPath(parameter, RequestType);
+            Pattern = GetPattern(parameter, RequestType);
         }
 
         static RequestType GetRequestType(ParameterInfo parameter)
@@ -24,10 +24,10 @@ namespace Staticsoft.Contracts.ASP
             ? RequestType.Parametrized
             : RequestType.Static;
 
-        static string GetPath(ParameterInfo parameter, RequestType type)
-            => $"/{parameter.Member.DeclaringType.Name}/{GetPathRemainder(parameter, type)}";
+        static string GetPattern(ParameterInfo parameter, RequestType type)
+            => $"/{parameter.Member.DeclaringType.Name}/{GetPatternRemainder(parameter, type)}";
 
-        static string GetPathRemainder(ParameterInfo parameter, RequestType type) => type switch
+        static string GetPatternRemainder(ParameterInfo parameter, RequestType type) => type switch
         {
             RequestType.Static => parameter.Name,
             RequestType.Parametrized => "{parameter}",

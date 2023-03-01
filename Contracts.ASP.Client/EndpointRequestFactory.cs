@@ -4,6 +4,6 @@ namespace Staticsoft.Contracts.ASP.Client
 {
     public interface EndpointRequestFactory
     {
-        HttpRequest Create(HttpEndpointMetadata metadata, object body);
+        HttpRequest Create(HttpEndpointMetadata metadata, string path, object body);
     }
 }

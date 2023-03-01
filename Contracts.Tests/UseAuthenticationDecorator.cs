@@ -16,8 +16,8 @@ namespace Staticsoft.Contracts.Tests
             Authentication = authentication;
         }
 
-        public HttpRequest Create(HttpEndpointMetadata metadata, object body)
-            => Create(metadata, Factory.Create(metadata, body));
+        public HttpRequest Create(HttpEndpointMetadata metadata, string path, object body)
+            => Create(metadata, Factory.Create(metadata, path, body));
 
         HttpRequest Create(HttpEndpointMetadata metadata, HttpRequest request)
             => metadata.HasAttribute<AuthenticateRequestAttribute>()

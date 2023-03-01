@@ -78,7 +78,7 @@ namespace Staticsoft.Contracts.ASP.Server
         }
 
         static void Map(this IEndpointRouteBuilder builder, HttpEndpointMetadata metadata)
-            => builder.GetMapper(metadata.GetAttribute<EndpointAttribute>().Method)(metadata.Path, (context) => HandleRequest(context, metadata));
+            => builder.GetMapper(metadata.GetAttribute<EndpointAttribute>().Method)(metadata.Pattern, (context) => HandleRequest(context, metadata));
 
         static Func<string, RequestDelegate, IEndpointConventionBuilder> GetMapper(this IEndpointRouteBuilder builder, HttpMethod method) => method switch
         {

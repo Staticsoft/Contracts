@@ -7,7 +7,7 @@ namespace Staticsoft.Contracts.ASP
     public interface HttpEndpointMetadata
     {
         T GetAttribute<T>() where T : Attribute;
-        string Path { get; }
+        string Pattern { get; }
         Type RequestBodyType { get; }
         Type ResponseBodyType { get; }
         RequestType RequestType { get; }

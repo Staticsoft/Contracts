@@ -1,18 +1,29 @@
-﻿using System;
+﻿using Staticsoft.Contracts.Abstractions;
+using System;
 using System.Reflection;
 
 namespace Staticsoft.Contracts.ASP
 {
     public class ReflectionHttpEndpointMetadata<TRequest, TResponse> : HttpEndpointMetadata<TRequest, TResponse>
     {
+        static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
+
         readonly ParameterInfo Parameter;
         public string Path { get; }
 
         public ReflectionHttpEndpointMetadata(ParameterInfo parameter)
         {
             Parameter = parameter;
-            Path = $"/{parameter.Member.DeclaringType.Name}/{parameter.Name}";
+            Path = GetPath(parameter);
         }
+
+        static string GetPath(ParameterInfo parameter)
+            => $"/{parameter.Member.DeclaringType.Name}/{GetPathRemainder(parameter)}";
+
+        static string GetPathRemainder(ParameterInfo parameter)
+            => parameter.ParameterType.GetGenericTypeDefinition() == ParametrizedHttpEndpointType
+            ? "{parameter}"
+            : parameter.Name;
 
         public Type RequestType
             => typeof(TRequest);

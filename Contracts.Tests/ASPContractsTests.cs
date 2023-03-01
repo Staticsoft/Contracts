@@ -6,6 +6,7 @@ using Staticsoft.Serialization.Net;
 using Staticsoft.TestContract;
 using Staticsoft.Testing;
 using Staticsoft.TestServer;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
@@ -64,6 +65,13 @@ namespace Staticsoft.Contracts.Tests
             Assert.Equal("Test", result.TestOutput);
             Assert.Equal("Other", sameNameEndpointResult.OtherOutput);
             Assert.Equal(nameof(TestAPIGroup.SameNameEndpoint), nameof(GroupWithSameEndpointName.SameNameEndpoint));
+        }
+
+        [Fact]
+        public async Task CanMakeRequestToEndpointWithParametrizedPath()
+        {
+            var parameter = $"{Guid.NewGuid()}";
+            //var response = await API.TestGroup.EmptyEndpoint.Execute(new HttpRequest<EmptyRequest>() { Body = new(), Parameter = parameter });
         }
     }
 }

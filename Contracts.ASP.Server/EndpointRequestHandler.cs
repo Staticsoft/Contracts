@@ -7,27 +7,25 @@ using System.Threading.Tasks;
 
 namespace Staticsoft.Contracts.ASP.Server
 {
-    public class EndpointRequestHandler<TRequest, TResponse> : HttpRequestHandler<TRequest, TResponse>
+    public class EndpointRequestHandler : HttpRequestHandler
     {
         readonly JsonSerializer Serializer;
-        readonly HttpEndpoint<TRequest, TResponse> Endpoint;
+        readonly HttpEndpointFactory Endpoint;
 
-        public EndpointRequestHandler(JsonSerializer serializer, HttpEndpoint<TRequest, TResponse> endpoint)
+        public EndpointRequestHandler(JsonSerializer serializer, HttpEndpointFactory factory)
+            => (Serializer, Endpoint)
+            = (serializer, factory);
+
+        public async Task Execute<TRequest, TResponse>(HttpContext context)
         {
-            Serializer = serializer;
-            Endpoint = endpoint;
-        }
+            var request = await ReadRequest<TRequest>(context);
 
-        public async Task Execute(HttpContext context)
-        {
-            var request = await ReadRequest(context);
-
-            var response = await Endpoint.Execute(request);
+            var response = await Endpoint.Resolve<TRequest, TResponse>().Execute(request);
 
             await WriteResponse(context, response);
         }
 
-        async Task<TRequest> ReadRequest(HttpContext context)
+        async Task<TRequest> ReadRequest<TRequest>(HttpContext context)
         {
             if (typeof(TRequest) == typeof(EmptyRequest)) return (TRequest)(object)new EmptyRequest();
 
@@ -36,21 +34,10 @@ namespace Staticsoft.Contracts.ASP.Server
             return Serializer.Deserialize<TRequest>(requestText);
         }
 
-        async Task WriteResponse(HttpContext context, TResponse response)
+        async Task WriteResponse<TResponse>(HttpContext context, TResponse response)
         {
             var responseText = Serializer.Serialize(response);
             await context.Response.WriteAsync(responseText, Encoding.UTF8);
         }
-    }
-
-    public class EndpointRequestHandler : HttpRequestHandler
-    {
-        readonly HttpRequestHandlerFactory Factory;
-
-        public EndpointRequestHandler(HttpRequestHandlerFactory factory)
-            => Factory = factory;
-
-        public Task Execute<TRequest, TResponse>(HttpContext context)
-            => Factory.Create<TRequest, TResponse>().Execute(context);
     }
 }

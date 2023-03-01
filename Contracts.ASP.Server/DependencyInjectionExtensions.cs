@@ -15,6 +15,7 @@ namespace Staticsoft.Contracts.ASP.Server
     public static class DependencyInjectionExtensions
     {
         static readonly Type HttpEndpointType = typeof(HttpEndpoint<,>);
+        static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
         static readonly Type HttpRequestHandlerType = typeof(HttpRequestHandler);
 
         public static IServiceCollection UseServerAPI<TAPI>(this IServiceCollection services, Assembly assembly)
@@ -32,8 +33,12 @@ namespace Staticsoft.Contracts.ASP.Server
 
         static Dictionary<Type, Type> GetEndpointsImplementations(Assembly assembly)
             => assembly.GetTypes()
-                .Where(type => type.GetInterfaces().Any(interfaceType => interfaceType.IsGenericTypeOf(HttpEndpointType)))
-                .ToDictionary(type => type.GetInterfaces().Single(interfaceType => interfaceType.IsGenericTypeOf(HttpEndpointType)));
+                .Where(type => type.GetInterfaces().Any(IsHttpEndpointInterface))
+                .ToDictionary(type => type.GetInterfaces().Single(IsHttpEndpointInterface));
+
+        static bool IsHttpEndpointInterface(Type interfaceType)
+            => interfaceType.IsGenericTypeOf(HttpEndpointType)
+            || interfaceType.IsGenericTypeOf(ParametrizedHttpEndpointType);
 
         static IServiceCollection RegisterEndpointsImplementations(
             this IServiceCollection services,

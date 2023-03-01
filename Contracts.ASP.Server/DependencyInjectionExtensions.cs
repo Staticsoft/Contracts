@@ -51,7 +51,14 @@ namespace Staticsoft.Contracts.ASP.Server
             IEnumerable<HttpEndpointMetadata> metadatas,
             Dictionary<Type, Type> implementations
         )
-            => metadatas.Where(metadata => !implementations.ContainsKey(HttpEndpointType.MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType)));
+            => metadatas.Where(metadata => NotImplementedEndpoint(implementations, metadata));
+
+        static bool NotImplementedEndpoint(Dictionary<Type, Type> implementations, HttpEndpointMetadata metadata) => metadata.RequestType switch
+        {
+            RequestType.Static => !implementations.ContainsKey(HttpEndpointType.MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType)),
+            RequestType.Parametrized => !implementations.ContainsKey(ParametrizedHttpEndpointType.MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType)),
+            _ => throw new NotSupportedException($"{nameof(RequestType)} {metadata.RequestType} is not supported")
+        };
 
         static IServiceCollection RegisterEndpointsImplementationsIfAllEndpointsImplemented(
             this IServiceCollection services,

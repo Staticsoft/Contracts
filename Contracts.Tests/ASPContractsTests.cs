@@ -71,7 +71,8 @@ namespace Staticsoft.Contracts.Tests
         public async Task CanMakeRequestToEndpointWithParametrizedPath()
         {
             var parameter = $"{Guid.NewGuid()}";
-            //var response = await API.TestGroup.EmptyEndpoint.Execute(new HttpRequest<EmptyRequest>() { Body = new(), Parameter = parameter });
+            var response = await API.TestGroup.EmptyParametrizedEndpoint.Execute(parameter);
+            Assert.Equal(parameter, response.Parameter);
         }
     }
 }

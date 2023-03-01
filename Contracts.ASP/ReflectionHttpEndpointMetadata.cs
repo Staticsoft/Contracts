@@ -8,28 +8,36 @@ namespace Staticsoft.Contracts.ASP
     {
         static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
 
-        readonly ParameterInfo Parameter;
+        readonly PropertyInfo Property;
         public string Pattern { get; }
         public RequestType RequestType { get; }
 
-        public ReflectionHttpEndpointMetadata(ParameterInfo parameter)
+        public ReflectionHttpEndpointMetadata(PropertyInfo property)
         {
-            Parameter = parameter;
-            RequestType = GetRequestType(parameter);
-            Pattern = GetPattern(parameter, RequestType);
+            Property = property;
+            RequestType = GetRequestType(property);
+            Pattern = GetPattern(property, RequestType);
         }
 
-        static RequestType GetRequestType(ParameterInfo parameter)
-            => parameter.ParameterType.GetGenericTypeDefinition() == ParametrizedHttpEndpointType
+        static RequestType GetRequestType(PropertyInfo property)
+            => property.PropertyType.GetGenericTypeDefinition() == ParametrizedHttpEndpointType
             ? RequestType.Parametrized
             : RequestType.Static;
 
-        static string GetPattern(ParameterInfo parameter, RequestType type)
-            => $"/{parameter.Member.DeclaringType.Name}/{GetPatternRemainder(parameter, type)}";
+        static string GetPattern(PropertyInfo property, RequestType type)
+            => $"/{property.DeclaringType.Name}/{GetPatternRemainder(property, type)}";
 
-        static string GetPatternRemainder(ParameterInfo parameter, RequestType type) => type switch
+        static string GetPatternRemainder(PropertyInfo property, RequestType type)
         {
-            RequestType.Static => parameter.Name,
+            var endpoint = property.GetCustomAttribute<EndpointAttribute>();
+            if (endpoint.Pattern != property.Name) return endpoint.Pattern;
+
+            return GetDefaultPatternRemainder(property, type);
+        }
+
+        static string GetDefaultPatternRemainder(PropertyInfo property, RequestType type) => type switch
+        {
+            RequestType.Static => property.Name,
             RequestType.Parametrized => "{parameter}",
             _ => throw new NotSupportedException($"{nameof(RequestType)} {type} is not supported")
         };
@@ -41,7 +49,7 @@ namespace Staticsoft.Contracts.ASP
             => typeof(ResponseBody);
 
         public T GetAttribute<T>() where T : Attribute
-            => Parameter.GetCustomAttribute<T>();
+            => Property.GetCustomAttribute<T>();
 
         public override bool Equals(object obj) => obj switch
         {

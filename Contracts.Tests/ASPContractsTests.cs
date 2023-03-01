@@ -64,7 +64,7 @@ namespace Staticsoft.Contracts.Tests
             var sameNameEndpointResult = await API.GroupWithSameEndpointName.SameNameEndpoint.Execute(new OtherThanSameNameRequest { OtherInput = "Other" });
             Assert.Equal("Test", result.TestOutput);
             Assert.Equal("Other", sameNameEndpointResult.OtherOutput);
-            Assert.Equal(nameof(TestAPIGroup.SameNameEndpoint), nameof(GroupWithSameEndpointName.SameNameEndpoint));
+            Assert.Equal(nameof(TestGroup.SameNameEndpoint), nameof(GroupWithSameEndpointName.SameNameEndpoint));
         }
 
         [Fact]
@@ -73,6 +73,13 @@ namespace Staticsoft.Contracts.Tests
             var parameter = $"{Guid.NewGuid()}";
             var response = await API.TestGroup.EmptyParametrizedEndpoint.Execute(parameter);
             Assert.Equal(parameter, response.Parameter);
+        }
+
+        [Fact]
+        public async Task CanMakeRequestToEndpointWithCustomPath()
+        {
+            var response = await API.TestGroup.CustomPathEndpoint.Execute();
+            Assert.Equal("/TestGroup/custom", response.RequestPath);
         }
     }
 }

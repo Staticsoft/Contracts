@@ -1,56 +1,65 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Staticsoft.Contracts.Abstractions;
 using Staticsoft.Serialization.Abstractions;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Staticsoft.Contracts.ASP.Server
 {
-    public class EndpointRequestHandler<TRequest, TResponse> : HttpRequestHandler<TRequest, TResponse>
+    public class EndpointRequestHandler : HttpRequestHandler
     {
         readonly JsonSerializer Serializer;
-        readonly HttpEndpoint<TRequest, TResponse> Endpoint;
+        readonly HttpEndpointFactory Endpoint;
+        readonly ParametrizedHttpEndpointFactory ParametrizedEndpoint;
 
-        public EndpointRequestHandler(JsonSerializer serializer, HttpEndpoint<TRequest, TResponse> endpoint)
+        public EndpointRequestHandler(JsonSerializer serializer, HttpEndpointFactory factory, ParametrizedHttpEndpointFactory parametrizedEndpoint)
+            => (Serializer, Endpoint, ParametrizedEndpoint)
+            = (serializer, factory, parametrizedEndpoint);
+
+        public async Task Execute<RequestBody, ResponseBody>(HttpContext context, HttpEndpointMetadata metadata)
         {
-            Serializer = serializer;
-            Endpoint = endpoint;
-        }
+            var request = await ReadRequest<RequestBody>(context);
 
-        public async Task Execute(HttpContext context)
-        {
-            var request = await ReadRequest(context);
-
-            var response = await Endpoint.Execute(request);
+            var response = await ExecuteRequest<RequestBody, ResponseBody>(request, metadata, context);
 
             await WriteResponse(context, response);
         }
 
-        async Task<TRequest> ReadRequest(HttpContext context)
+        Task<ResponseBody> ExecuteRequest<RequestBody, ResponseBody>(
+            RequestBody request,
+            HttpEndpointMetadata metadata,
+            HttpContext context
+        ) => metadata.RequestType switch
         {
-            if (typeof(TRequest) == typeof(EmptyRequest)) return (TRequest)(object)new EmptyRequest();
+            RequestType.Static => ExecuteStaticRequest<RequestBody, ResponseBody>(request),
+            RequestType.Parametrized => ExecuteParametrizedRequest<RequestBody, ResponseBody>(request, context),
+            _ => throw new NotSupportedException($"{nameof(RequestType)} {metadata.RequestType} is not supported")
+        };
+
+        Task<ResponseBody> ExecuteStaticRequest<RequestBody, ResponseBody>(RequestBody request)
+            => Endpoint.Resolve<RequestBody, ResponseBody>().Execute(request);
+
+        Task<ResponseBody> ExecuteParametrizedRequest<RequestBody, ResponseBody>(RequestBody request, HttpContext context)
+            => ParametrizedEndpoint.Resolve<RequestBody, ResponseBody>().Execute(GetParameter(context.Request.Path), request);
+
+        static string GetParameter(string requestPath)
+            => requestPath[(requestPath.LastIndexOf('/') + 1)..];
+
+        async Task<RequestBody> ReadRequest<RequestBody>(HttpContext context)
+        {
+            if (typeof(RequestBody) == typeof(EmptyRequest)) return (RequestBody)(object)new EmptyRequest();
 
             using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             var requestText = await reader.ReadToEndAsync();
-            return Serializer.Deserialize<TRequest>(requestText);
+            return Serializer.Deserialize<RequestBody>(requestText);
         }
 
-        async Task WriteResponse(HttpContext context, TResponse response)
+        async Task WriteResponse<ResponseBody>(HttpContext context, ResponseBody response)
         {
             var responseText = Serializer.Serialize(response);
             await context.Response.WriteAsync(responseText, Encoding.UTF8);
         }
-    }
-
-    public class EndpointRequestHandler : HttpRequestHandler
-    {
-        readonly HttpRequestHandlerFactory Factory;
-
-        public EndpointRequestHandler(HttpRequestHandlerFactory factory)
-            => Factory = factory;
-
-        public Task Execute<TRequest, TResponse>(HttpContext context)
-            => Factory.Create<TRequest, TResponse>().Execute(context);
     }
 }

@@ -9,12 +9,14 @@ namespace Staticsoft.Contracts.ASP.Client
     public static class DependencyInjectionExtensions
     {
         static readonly Type HttpEndpointType = typeof(HttpEndpoint<,>);
+        static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
 
         public static IServiceCollection UseClientAPI<TAPI>(this IServiceCollection services) where TAPI : class
             => services
                 .AddSingleton<TAPI>()
                 .AddGroups<TAPI>()
                 .AddSingleton(HttpEndpointType, typeof(HttpEndpointAccessor<,>))
+                .AddSingleton(ParametrizedHttpEndpointType, typeof(HttpEndpointAccessor<,>))
                 .AddSingleton<HttpResultHandler, StatusCodeResultHandler>()
                 .AddSingleton<EndpointRequestFactory, HttpEndpointRequestFactory>()
                 .AddMetadata(HttpEndpointMetadataAccessor.GetMetadata(typeof(TAPI)));

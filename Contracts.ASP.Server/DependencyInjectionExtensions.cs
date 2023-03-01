@@ -15,14 +15,15 @@ namespace Staticsoft.Contracts.ASP.Server
     public static class DependencyInjectionExtensions
     {
         static readonly Type HttpEndpointType = typeof(HttpEndpoint<,>);
+        static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
         static readonly Type HttpRequestHandlerType = typeof(HttpRequestHandler);
 
         public static IServiceCollection UseServerAPI<TAPI>(this IServiceCollection services, Assembly assembly)
             where TAPI : class
             => services
                 .AddSingleton<HttpRequestHandler, EndpointRequestHandler>()
-                .AddSingleton<HttpRequestHandlerFactory, DependencyInjectionHttpRequestHandlerFactory>()
-                .AddSingleton(typeof(HttpRequestHandler<,>), typeof(EndpointRequestHandler<,>))
+                .AddSingleton<HttpEndpointFactory, DependencyInjectionHttpRequestHandlerFactory>()
+                .AddSingleton<ParametrizedHttpEndpointFactory, DependencyInjectionParametrizedHttpRequestHandlerFactory>()
                 .AddEndpoints<TAPI>(HttpEndpointMetadataAccessor.GetMetadata(typeof(TAPI)), assembly);
 
         static IServiceCollection AddEndpoints<TAPI>(this IServiceCollection services, IEnumerable<HttpEndpointMetadata> metadata, Assembly assembly)
@@ -32,8 +33,12 @@ namespace Staticsoft.Contracts.ASP.Server
 
         static Dictionary<Type, Type> GetEndpointsImplementations(Assembly assembly)
             => assembly.GetTypes()
-                .Where(type => type.GetInterfaces().Any(interfaceType => interfaceType.IsGenericTypeOf(HttpEndpointType)))
-                .ToDictionary(type => type.GetInterfaces().Single(interfaceType => interfaceType.IsGenericTypeOf(HttpEndpointType)));
+                .Where(type => type.GetInterfaces().Any(IsHttpEndpointInterface))
+                .ToDictionary(type => type.GetInterfaces().Single(IsHttpEndpointInterface));
+
+        static bool IsHttpEndpointInterface(Type interfaceType)
+            => interfaceType.IsGenericTypeOf(HttpEndpointType)
+            || interfaceType.IsGenericTypeOf(ParametrizedHttpEndpointType);
 
         static IServiceCollection RegisterEndpointsImplementations(
             this IServiceCollection services,
@@ -46,7 +51,14 @@ namespace Staticsoft.Contracts.ASP.Server
             IEnumerable<HttpEndpointMetadata> metadatas,
             Dictionary<Type, Type> implementations
         )
-            => metadatas.Where(metadata => !implementations.ContainsKey(HttpEndpointType.MakeGenericType(metadata.RequestType, metadata.ResponseType)));
+            => metadatas.Where(metadata => NotImplementedEndpoint(implementations, metadata));
+
+        static bool NotImplementedEndpoint(Dictionary<Type, Type> implementations, HttpEndpointMetadata metadata) => metadata.RequestType switch
+        {
+            RequestType.Static => !implementations.ContainsKey(HttpEndpointType.MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType)),
+            RequestType.Parametrized => !implementations.ContainsKey(ParametrizedHttpEndpointType.MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType)),
+            _ => throw new NotSupportedException($"{nameof(RequestType)} {metadata.RequestType} is not supported")
+        };
 
         static IServiceCollection RegisterEndpointsImplementationsIfAllEndpointsImplemented(
             this IServiceCollection services,
@@ -73,7 +85,7 @@ namespace Staticsoft.Contracts.ASP.Server
         }
 
         static void Map(this IEndpointRouteBuilder builder, HttpEndpointMetadata metadata)
-            => builder.GetMapper(metadata.GetAttribute<EndpointAttribute>().Method)(metadata.Path, (context) => HandleRequest(context, metadata.RequestType, metadata.ResponseType));
+            => builder.GetMapper(metadata.GetAttribute<EndpointAttribute>().Method)(metadata.Pattern, (context) => HandleRequest(context, metadata));
 
         static Func<string, RequestDelegate, IEndpointConventionBuilder> GetMapper(this IEndpointRouteBuilder builder, HttpMethod method) => method switch
         {
@@ -84,10 +96,10 @@ namespace Staticsoft.Contracts.ASP.Server
             _ => throw new Exception($"Unsupported method: {method}")
         };
 
-        static async Task HandleRequest(HttpContext context, Type requestType, Type responseType)
+        static async Task HandleRequest(HttpContext context, HttpEndpointMetadata metadata)
             => await (Task)HttpRequestHandlerType
                 .GetMethod(nameof(HttpRequestHandler.Execute))
-                .MakeGenericMethod(requestType, responseType)
-                .Invoke(context.RequestServices.GetRequiredService(HttpRequestHandlerType), new[] { context });
+                .MakeGenericMethod(metadata.RequestBodyType, metadata.ResponseBodyType)
+                .Invoke(context.RequestServices.GetRequiredService(HttpRequestHandlerType), new object[] { context, metadata });
     }
 }

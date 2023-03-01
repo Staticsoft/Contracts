@@ -8,6 +8,7 @@ namespace Staticsoft.TestContract
         public readonly HttpEndpoint<TestRequest, TestResponse> TestEndpoint;
         public readonly HttpEndpoint<EmptyRequest, EmptyResponse> EmptyEndpoint;
         public readonly HttpEndpoint<SameNameRequest, SameNameResponse> SameNameEndpoint;
+        public readonly ParametrizedHttpEndpoint<EmptyRequest, RequestParameterResponse> EmptyParametrizedEndpoint;
 
         public TestAPIGroup(
             [Endpoint(HttpMethod.Post)]
@@ -18,12 +19,16 @@ namespace Staticsoft.TestContract
             HttpEndpoint<EmptyRequest, EmptyResponse> emptyEndpoint,
 
             [Endpoint(HttpMethod.Post)]
-            HttpEndpoint<SameNameRequest, SameNameResponse> sameNameEndpoint
+            HttpEndpoint<SameNameRequest, SameNameResponse> sameNameEndpoint,
+
+            [Endpoint(HttpMethod.Get)]
+            ParametrizedHttpEndpoint<EmptyRequest, RequestParameterResponse> emptyParametrizedEndpoint
         )
         {
             TestEndpoint = testEndpoint;
             EmptyEndpoint = emptyEndpoint;
             SameNameEndpoint = sameNameEndpoint;
+            EmptyParametrizedEndpoint = emptyParametrizedEndpoint;
         }
     }
 }

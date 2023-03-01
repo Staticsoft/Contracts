@@ -10,6 +10,7 @@ namespace Staticsoft.Contracts.ASP
     public static class HttpEndpointMetadataAccessor
     {
         static readonly Type HttpEndpointType = typeof(HttpEndpoint<,>);
+        static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
 
         public static IServiceCollection AddMetadata(IServiceCollection services, IEnumerable<HttpEndpointMetadata> metadata)
         {
@@ -37,7 +38,7 @@ namespace Staticsoft.Contracts.ASP
         }
 
         static IEnumerable<HttpEndpointMetadata> GetMetadata(ParameterInfo parameter)
-            => parameter.ParameterType.IsGenericTypeOf(HttpEndpointType)
+            => parameter.ParameterType.IsGenericTypeOf(HttpEndpointType) || parameter.ParameterType.IsGenericTypeOf(ParametrizedHttpEndpointType)
             ? new[] { CreateMetadata(parameter) }
             : GetMetadata(parameter.ParameterType);
 
@@ -58,6 +59,6 @@ namespace Staticsoft.Contracts.ASP
                 .Invoke(new[] { parameter }) as HttpEndpointMetadata;
 
         static Type MakeHttpEndpointMetadata(HttpEndpointMetadata metadata)
-            => typeof(HttpEndpointMetadata<,>).MakeGenericType(metadata.RequestType, metadata.ResponseType);
+            => typeof(HttpEndpointMetadata<,>).MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType);
     }
 }

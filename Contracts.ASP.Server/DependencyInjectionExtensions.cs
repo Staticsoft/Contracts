@@ -45,7 +45,7 @@ namespace Staticsoft.Contracts.ASP.Server
             IEnumerable<HttpEndpointMetadata> metadatas,
             Dictionary<Type, Type> implementations
         )
-            => metadatas.Where(metadata => !implementations.ContainsKey(HttpEndpointType.MakeGenericType(metadata.RequestType, metadata.ResponseType)));
+            => metadatas.Where(metadata => !implementations.ContainsKey(HttpEndpointType.MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType)));
 
         static IServiceCollection RegisterEndpointsImplementationsIfAllEndpointsImplemented(
             this IServiceCollection services,
@@ -86,7 +86,7 @@ namespace Staticsoft.Contracts.ASP.Server
         static async Task HandleRequest(HttpContext context, HttpEndpointMetadata metadata)
             => await (Task)HttpRequestHandlerType
                 .GetMethod(nameof(HttpRequestHandler.Execute))
-                .MakeGenericMethod(metadata.RequestType, metadata.ResponseType)
-                .Invoke(context.RequestServices.GetRequiredService(HttpRequestHandlerType), new[] { context });
+                .MakeGenericMethod(metadata.RequestBodyType, metadata.ResponseBodyType)
+                .Invoke(context.RequestServices.GetRequiredService(HttpRequestHandlerType), new object[] { context, metadata });
     }
 }

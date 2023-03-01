@@ -2,8 +2,8 @@
 
 namespace Staticsoft.Contracts.Abstractions
 {
-    public interface HttpEndpoint<TRequest, TResponse>
+    public interface HttpEndpoint<RequestBody, ResponseBody>
     {
-        Task<TResponse> Execute(TRequest request);
+        Task<ResponseBody> Execute(RequestBody request);
     }
 }

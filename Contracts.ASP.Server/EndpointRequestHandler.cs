@@ -16,25 +16,25 @@ namespace Staticsoft.Contracts.ASP.Server
             => (Serializer, Endpoint)
             = (serializer, factory);
 
-        public async Task Execute<TRequest, TResponse>(HttpContext context)
+        public async Task Execute<RequestBody, ResponseBody>(HttpContext context, HttpEndpointMetadata metadata)
         {
-            var request = await ReadRequest<TRequest>(context);
+            var request = await ReadRequest<RequestBody>(context);
 
-            var response = await Endpoint.Resolve<TRequest, TResponse>().Execute(request);
+            var response = await Endpoint.Resolve<RequestBody, ResponseBody>().Execute(request);
 
             await WriteResponse(context, response);
         }
 
-        async Task<TRequest> ReadRequest<TRequest>(HttpContext context)
+        async Task<RequestBody> ReadRequest<RequestBody>(HttpContext context)
         {
-            if (typeof(TRequest) == typeof(EmptyRequest)) return (TRequest)(object)new EmptyRequest();
+            if (typeof(RequestBody) == typeof(EmptyRequest)) return (RequestBody)(object)new EmptyRequest();
 
             using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             var requestText = await reader.ReadToEndAsync();
-            return Serializer.Deserialize<TRequest>(requestText);
+            return Serializer.Deserialize<RequestBody>(requestText);
         }
 
-        async Task WriteResponse<TResponse>(HttpContext context, TResponse response)
+        async Task WriteResponse<ResponseBody>(HttpContext context, ResponseBody response)
         {
             var responseText = Serializer.Serialize(response);
             await context.Response.WriteAsync(responseText, Encoding.UTF8);

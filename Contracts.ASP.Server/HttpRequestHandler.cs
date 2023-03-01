@@ -5,6 +5,6 @@ namespace Staticsoft.Contracts.ASP.Server
 {
     public interface HttpRequestHandler
     {
-        Task Execute<TRequest, TResponse>(HttpContext context);
+        Task Execute<RequestBody, ResponseBody>(HttpContext context, HttpEndpointMetadata metadata);
     }
 }

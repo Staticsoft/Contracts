@@ -4,50 +4,59 @@ using System.Reflection;
 
 namespace Staticsoft.Contracts.ASP
 {
-    public class ReflectionHttpEndpointMetadata<TRequest, TResponse> : HttpEndpointMetadata<TRequest, TResponse>
+    public class ReflectionHttpEndpointMetadata<RequestBody, ResponseBody> : HttpEndpointMetadata<RequestBody, ResponseBody>
     {
         static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
 
         readonly ParameterInfo Parameter;
         public string Path { get; }
+        public RequestType RequestType { get; }
 
         public ReflectionHttpEndpointMetadata(ParameterInfo parameter)
         {
             Parameter = parameter;
-            Path = GetPath(parameter);
+            RequestType = GetRequestType(parameter);
+            Path = GetPath(parameter, RequestType);
         }
 
-        static string GetPath(ParameterInfo parameter)
-            => $"/{parameter.Member.DeclaringType.Name}/{GetPathRemainder(parameter)}";
-
-        static string GetPathRemainder(ParameterInfo parameter)
+        static RequestType GetRequestType(ParameterInfo parameter)
             => parameter.ParameterType.GetGenericTypeDefinition() == ParametrizedHttpEndpointType
-            ? "{parameter}"
-            : parameter.Name;
+            ? RequestType.Parametrized
+            : RequestType.Static;
 
-        public Type RequestType
-            => typeof(TRequest);
+        static string GetPath(ParameterInfo parameter, RequestType type)
+            => $"/{parameter.Member.DeclaringType.Name}/{GetPathRemainder(parameter, type)}";
 
-        public Type ResponseType
-            => typeof(TResponse);
+        static string GetPathRemainder(ParameterInfo parameter, RequestType type) => type switch
+        {
+            RequestType.Static => parameter.Name,
+            RequestType.Parametrized => "{parameter}",
+            _ => throw new NotSupportedException($"{nameof(RequestType)} {type} is not supported")
+        };
+
+        public Type RequestBodyType
+            => typeof(RequestBody);
+
+        public Type ResponseBodyType
+            => typeof(ResponseBody);
 
         public T GetAttribute<T>() where T : Attribute
             => Parameter.GetCustomAttribute<T>();
 
         public override bool Equals(object obj) => obj switch
         {
-            ReflectionHttpEndpointMetadata<TRequest, TResponse> metadata => Equals(metadata),
+            ReflectionHttpEndpointMetadata<RequestBody, ResponseBody> metadata => Equals(metadata),
             _ => false
         };
 
-        bool Equals(ReflectionHttpEndpointMetadata<TRequest, TResponse> metadata)
-            => metadata.RequestType == RequestType
-            && metadata.ResponseType == ResponseType;
+        bool Equals(ReflectionHttpEndpointMetadata<RequestBody, ResponseBody> metadata)
+            => metadata.RequestBodyType == RequestBodyType
+            && metadata.ResponseBodyType == ResponseBodyType;
 
         public override int GetHashCode()
-            => HashCode.Combine(RequestType, ResponseType);
+            => HashCode.Combine(RequestBodyType, ResponseBodyType);
 
         public override string ToString()
-            => $"{nameof(HttpEndpointMetadata)}<{RequestType.Name}, {ResponseType.Name}>";
+            => $"{nameof(HttpEndpointMetadata)}<{RequestBodyType.Name}, {ResponseBodyType.Name}>";
     }
 }

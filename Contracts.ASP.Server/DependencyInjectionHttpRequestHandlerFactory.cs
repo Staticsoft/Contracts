@@ -11,7 +11,7 @@ namespace Staticsoft.Contracts.ASP.Server
         public DependencyInjectionHttpRequestHandlerFactory(IServiceProvider provider)
             => Provider = provider;
 
-        public HttpEndpoint<TRequest, TResponse> Resolve<TRequest, TResponse>()
-            => Provider.GetRequiredService<HttpEndpoint<TRequest, TResponse>>();
+        public HttpEndpoint<RequestBody, ResponseBody> Resolve<RequestBody, ResponseBody>()
+            => Provider.GetRequiredService<HttpEndpoint<RequestBody, ResponseBody>>();
     }
 }

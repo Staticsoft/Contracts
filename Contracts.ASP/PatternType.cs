@@ -1,6 +1,6 @@
 ﻿namespace Staticsoft.Contracts.ASP
 {
-    public enum RequestType
+    public enum PatternType
     {
         Static,
         Parametrized

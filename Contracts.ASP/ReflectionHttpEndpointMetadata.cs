@@ -9,25 +9,47 @@ namespace Staticsoft.Contracts.ASP
         static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
 
         readonly PropertyInfo Property;
-        public string Pattern { get; }
-        public RequestType RequestType { get; }
+
+        public RequestMetadata Request { get; }
+        public ResponseMetadata Response { get; }
+
+        public T GetAttribute<T>() where T : Attribute
+            => Property.GetCustomAttribute<T>();
 
         public ReflectionHttpEndpointMetadata(PropertyInfo property, string basePattern)
         {
             Property = property;
-            RequestType = GetRequestType(property);
-            Pattern = GetPattern(property, basePattern, RequestType);
+            Request = GetRequestMetadata(property, basePattern);
+            Response = GetResponseMetadata();
         }
 
-        static RequestType GetRequestType(PropertyInfo property)
-            => property.PropertyType.GetGenericTypeDefinition() == ParametrizedHttpEndpointType
-            ? RequestType.Parametrized
-            : RequestType.Static;
+        static RequestMetadata GetRequestMetadata(PropertyInfo property, string basePattern)
+            => GetRequestMetadata(property, GetPatternType(property), basePattern);
 
-        static string GetPattern(PropertyInfo property, string basePattern, RequestType type)
+        static RequestMetadata GetRequestMetadata(PropertyInfo property, PatternType patternType, string basePattern) => new()
+        {
+            BodyType = typeof(RequestBody),
+            Pattern = new()
+            {
+                Value = GetPattern(property, basePattern, patternType),
+                Type = patternType
+            }
+        };
+
+        static ResponseMetadata GetResponseMetadata() => new()
+        {
+            BodyType = typeof(ResponseBody)
+        };
+
+        static PatternType GetPatternType(PropertyInfo property)
+            => property.PropertyType.GetGenericTypeDefinition() == ParametrizedHttpEndpointType
+            ? PatternType.Parametrized
+            : PatternType.Static;
+
+        static string GetPattern(PropertyInfo property, string basePattern, PatternType type)
             => $"{basePattern}/{GetEndpointPattern(property, type)}";
 
-        static string GetEndpointPattern(PropertyInfo property, RequestType type)
+        static string GetEndpointPattern(PropertyInfo property, PatternType type)
         {
             var endpoint = property.GetCustomAttribute<EndpointAttribute>();
             if (endpoint.Pattern != property.Name) return endpoint.Pattern;
@@ -35,21 +57,12 @@ namespace Staticsoft.Contracts.ASP
             return GetDefaultEndpointPattern(property, type);
         }
 
-        static string GetDefaultEndpointPattern(PropertyInfo property, RequestType type) => type switch
+        static string GetDefaultEndpointPattern(PropertyInfo property, PatternType type) => type switch
         {
-            RequestType.Static => property.Name,
-            RequestType.Parametrized => "{parameter}",
-            _ => throw new NotSupportedException($"{nameof(RequestType)} {type} is not supported")
+            PatternType.Static => property.Name,
+            PatternType.Parametrized => "{parameter}",
+            _ => throw new NotSupportedException($"{nameof(PatternType)} {type} is not supported")
         };
-
-        public Type RequestBodyType
-            => typeof(RequestBody);
-
-        public Type ResponseBodyType
-            => typeof(ResponseBody);
-
-        public T GetAttribute<T>() where T : Attribute
-            => Property.GetCustomAttribute<T>();
 
         public override bool Equals(object obj) => obj switch
         {
@@ -58,13 +71,13 @@ namespace Staticsoft.Contracts.ASP
         };
 
         bool Equals(ReflectionHttpEndpointMetadata<RequestBody, ResponseBody> metadata)
-            => metadata.RequestBodyType == RequestBodyType
-            && metadata.ResponseBodyType == ResponseBodyType;
+            => metadata.Request.BodyType == Request.BodyType
+            && metadata.Response.BodyType == Response.BodyType;
 
         public override int GetHashCode()
-            => HashCode.Combine(RequestBodyType, ResponseBodyType);
+            => HashCode.Combine(Request.BodyType, Response.BodyType);
 
         public override string ToString()
-            => $"{nameof(HttpEndpointMetadata)}<{RequestBodyType.Name}, {ResponseBodyType.Name}>";
+            => $"{nameof(HttpEndpointMetadata)}<{Request.BodyType.Name}, {Response.BodyType.Name}>";
     }
 }

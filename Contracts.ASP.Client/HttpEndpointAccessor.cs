@@ -30,10 +30,10 @@ namespace Staticsoft.Contracts.ASP.Client
         }
 
         public Task<ResponseBody> Execute(RequestBody body)
-            => ExecuteRequest(Factory.Create(Metadata, Metadata.Pattern, body));
+            => ExecuteRequest(Factory.Create(Metadata, Metadata.Request.Pattern.Value, body));
 
         public Task<ResponseBody> Execute(string parameter, RequestBody body)
-            => ExecuteRequest(Factory.Create(Metadata, Metadata.Pattern.Replace("{parameter}", parameter), body));
+            => ExecuteRequest(Factory.Create(Metadata, Metadata.Request.Pattern.Value.Replace("{parameter}", parameter), body));
 
         async Task<ResponseBody> ExecuteRequest(HttpRequest request)
         {

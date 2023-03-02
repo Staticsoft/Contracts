@@ -63,6 +63,6 @@ namespace Staticsoft.Contracts.ASP
                 .Invoke(new object[] { property, basePattern }) as HttpEndpointMetadata;
 
         static Type MakeHttpEndpointMetadata(HttpEndpointMetadata metadata)
-            => typeof(HttpEndpointMetadata<,>).MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType);
+            => typeof(HttpEndpointMetadata<,>).MakeGenericType(metadata.Request.BodyType, metadata.Response.BodyType);
     }
 }

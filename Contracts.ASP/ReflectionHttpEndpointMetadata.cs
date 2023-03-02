@@ -12,11 +12,11 @@ namespace Staticsoft.Contracts.ASP
         public string Pattern { get; }
         public RequestType RequestType { get; }
 
-        public ReflectionHttpEndpointMetadata(PropertyInfo property)
+        public ReflectionHttpEndpointMetadata(PropertyInfo property, string basePattern)
         {
             Property = property;
             RequestType = GetRequestType(property);
-            Pattern = GetPattern(property, RequestType);
+            Pattern = GetPattern(property, basePattern, RequestType);
         }
 
         static RequestType GetRequestType(PropertyInfo property)
@@ -24,18 +24,18 @@ namespace Staticsoft.Contracts.ASP
             ? RequestType.Parametrized
             : RequestType.Static;
 
-        static string GetPattern(PropertyInfo property, RequestType type)
-            => $"/{property.DeclaringType.Name}/{GetPatternRemainder(property, type)}";
+        static string GetPattern(PropertyInfo property, string basePattern, RequestType type)
+            => $"{basePattern}/{GetEndpointPattern(property, type)}";
 
-        static string GetPatternRemainder(PropertyInfo property, RequestType type)
+        static string GetEndpointPattern(PropertyInfo property, RequestType type)
         {
             var endpoint = property.GetCustomAttribute<EndpointAttribute>();
             if (endpoint.Pattern != property.Name) return endpoint.Pattern;
 
-            return GetDefaultPatternRemainder(property, type);
+            return GetDefaultEndpointPattern(property, type);
         }
 
-        static string GetDefaultPatternRemainder(PropertyInfo property, RequestType type) => type switch
+        static string GetDefaultEndpointPattern(PropertyInfo property, RequestType type) => type switch
         {
             RequestType.Static => property.Name,
             RequestType.Parametrized => "{parameter}",

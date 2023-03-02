@@ -79,7 +79,14 @@ namespace Staticsoft.Contracts.Tests
         public async Task CanMakeRequestToEndpointWithCustomPath()
         {
             var response = await API.TestGroup.CustomPathEndpoint.Execute();
-            Assert.Equal("/TestGroup/custom", response.RequestPath);
+            Assert.Equal($"/{nameof(API.TestGroup)}/custom", response.RequestPath);
+        }
+
+        [Fact]
+        public async Task MakesRequestToNestedPathEndpoint()
+        {
+            var response = await API.TestGroup.Nested.NestedEndpoint.Execute();
+            Assert.Equal($"/{nameof(API.TestGroup)}/{nameof(API.TestGroup.Nested)}/{nameof(API.TestGroup.Nested.NestedEndpoint)}", response.RequestPath);
         }
     }
 }

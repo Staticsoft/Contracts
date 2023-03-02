@@ -10,7 +10,8 @@ namespace Staticsoft.TestContract
             HttpEndpoint<EmptyRequest, EmptyResponse> emptyEndpoint,
             HttpEndpoint<SameNameRequest, SameNameResponse> sameNameEndpoint,
             ParametrizedHttpEndpoint<EmptyRequest, RequestParameterResponse> emptyParametrizedEndpoint,
-            HttpEndpoint<EmptyRequest, RequestPathResponse> customPathEndpoint
+            HttpEndpoint<EmptyRequest, CustomRequestPathResponse> customPathEndpoint,
+            NestedGroup nested
         )
         {
             TestEndpoint = testEndpoint;
@@ -18,6 +19,7 @@ namespace Staticsoft.TestContract
             SameNameEndpoint = sameNameEndpoint;
             EmptyParametrizedEndpoint = emptyParametrizedEndpoint;
             CustomPathEndpoint = customPathEndpoint;
+            Nested = nested;
         }
 
         [Endpoint(HttpMethod.Post)]
@@ -34,6 +36,8 @@ namespace Staticsoft.TestContract
         public ParametrizedHttpEndpoint<EmptyRequest, RequestParameterResponse> EmptyParametrizedEndpoint { get; }
 
         [Endpoint(HttpMethod.Get, "custom")]
-        public HttpEndpoint<EmptyRequest, RequestPathResponse> CustomPathEndpoint { get; }
+        public HttpEndpoint<EmptyRequest, CustomRequestPathResponse> CustomPathEndpoint { get; }
+
+        public NestedGroup Nested { get; }
     }
 }

@@ -24,18 +24,18 @@ namespace Staticsoft.Contracts.ASP.Server
 
             var response = await ExecuteRequest<RequestBody, ResponseBody>(request, metadata, context);
 
-            await WriteResponse(context, response);
+            await WriteResponse(context, response, metadata);
         }
 
         Task<ResponseBody> ExecuteRequest<RequestBody, ResponseBody>(
             RequestBody request,
             HttpEndpointMetadata metadata,
             HttpContext context
-        ) => metadata.RequestType switch
+        ) => metadata.Request.Pattern.Type switch
         {
-            RequestType.Static => ExecuteStaticRequest<RequestBody, ResponseBody>(request),
-            RequestType.Parametrized => ExecuteParametrizedRequest<RequestBody, ResponseBody>(request, context),
-            _ => throw new NotSupportedException($"{nameof(RequestType)} {metadata.RequestType} is not supported")
+            PatternType.Static => ExecuteStaticRequest<RequestBody, ResponseBody>(request),
+            PatternType.Parametrized => ExecuteParametrizedRequest<RequestBody, ResponseBody>(request, context),
+            _ => throw new NotSupportedException($"{nameof(PatternType)} {metadata.Request.Pattern.Type} is not supported")
         };
 
         Task<ResponseBody> ExecuteStaticRequest<RequestBody, ResponseBody>(RequestBody request)
@@ -56,8 +56,12 @@ namespace Staticsoft.Contracts.ASP.Server
             return Serializer.Deserialize<RequestBody>(requestText);
         }
 
-        async Task WriteResponse<ResponseBody>(HttpContext context, ResponseBody response)
+        async Task WriteResponse<ResponseBody>(HttpContext context, ResponseBody response, HttpEndpointMetadata metadata)
         {
+            if (metadata.TryGetAttribute<EndpointBehaviorAttribute>(out var behavior))
+            {
+                context.Response.StatusCode = behavior.StatusCode;
+            }
             var responseText = Serializer.Serialize(response);
             await context.Response.WriteAsync(responseText, Encoding.UTF8);
         }

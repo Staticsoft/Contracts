@@ -23,18 +23,25 @@ namespace Staticsoft.Contracts.Tests
 
     public class ASPContractsTests : TestBase<IntegrationServices>
     {
-        readonly TestAPI API;
+        readonly IServiceProvider Provider;
 
         public ASPContractsTests()
-            => API = new ServiceCollection()
+            => Provider = Services.BuildServiceProvider();
+
+        protected virtual IServiceCollection Services
+            => new ServiceCollection()
                 .UseClientAPI<TestAPI>()
                 .UseSystemJsonSerializer()
                 .UseJsonHttpCommunication()
                 .AddSingleton(Get<HttpClient>())
                 .DecorateSingleton<EndpointRequestFactory, UseAuthenticationDecorator>()
-                .AddSingleton<Authentication>(Get<AuthenticationFake>())
-                .BuildServiceProvider()
-                .GetRequiredService<TestAPI>();
+                .AddSingleton<Authentication>(Get<AuthenticationFake>());
+
+        protected TestAPI API
+            => Service<TestAPI>();
+
+        protected T Service<T>()
+            => Provider.GetRequiredService<T>();
 
         [Fact]
         public async Task CanMakeRequest()

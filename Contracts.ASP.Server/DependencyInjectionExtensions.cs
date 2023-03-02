@@ -53,11 +53,11 @@ namespace Staticsoft.Contracts.ASP.Server
         )
             => metadatas.Where(metadata => NotImplementedEndpoint(implementations, metadata));
 
-        static bool NotImplementedEndpoint(Dictionary<Type, Type> implementations, HttpEndpointMetadata metadata) => metadata.RequestType switch
+        static bool NotImplementedEndpoint(Dictionary<Type, Type> implementations, HttpEndpointMetadata metadata) => metadata.Request.Pattern.Type switch
         {
-            RequestType.Static => !implementations.ContainsKey(HttpEndpointType.MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType)),
-            RequestType.Parametrized => !implementations.ContainsKey(ParametrizedHttpEndpointType.MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType)),
-            _ => throw new NotSupportedException($"{nameof(RequestType)} {metadata.RequestType} is not supported")
+            PatternType.Static => !implementations.ContainsKey(HttpEndpointType.MakeGenericType(metadata.Request.BodyType, metadata.Response.BodyType)),
+            PatternType.Parametrized => !implementations.ContainsKey(ParametrizedHttpEndpointType.MakeGenericType(metadata.Request.BodyType, metadata.Response.BodyType)),
+            _ => throw new NotSupportedException($"{nameof(PatternType)} {metadata.Request.Pattern.Type} is not supported")
         };
 
         static IServiceCollection RegisterEndpointsImplementationsIfAllEndpointsImplemented(
@@ -85,7 +85,7 @@ namespace Staticsoft.Contracts.ASP.Server
         }
 
         static void Map(this IEndpointRouteBuilder builder, HttpEndpointMetadata metadata)
-            => builder.GetMapper(metadata.GetAttribute<EndpointAttribute>().Method)(metadata.Pattern, (context) => HandleRequest(context, metadata));
+            => builder.GetMapper(metadata.GetAttribute<EndpointAttribute>().Method)(metadata.Request.Pattern.Value, (context) => HandleRequest(context, metadata));
 
         static Func<string, RequestDelegate, IEndpointConventionBuilder> GetMapper(this IEndpointRouteBuilder builder, HttpMethod method) => method switch
         {
@@ -99,7 +99,7 @@ namespace Staticsoft.Contracts.ASP.Server
         static async Task HandleRequest(HttpContext context, HttpEndpointMetadata metadata)
             => await (Task)HttpRequestHandlerType
                 .GetMethod(nameof(HttpRequestHandler.Execute))
-                .MakeGenericMethod(metadata.RequestBodyType, metadata.ResponseBodyType)
+                .MakeGenericMethod(metadata.Request.BodyType, metadata.Response.BodyType)
                 .Invoke(context.RequestServices.GetRequiredService(HttpRequestHandlerType), new object[] { context, metadata });
     }
 }

@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 
 namespace Staticsoft.TestServer
 {
-    public class CustomPathEndpointHandler : HttpEndpoint<EmptyRequest, RequestPathResponse>
+    public class CustomPathEndpointHandler : HttpEndpoint<EmptyRequest, CustomRequestPathResponse>
     {
         readonly IHttpContextAccessor Accessor;
 
         public CustomPathEndpointHandler(IHttpContextAccessor accessor)
             => Accessor = accessor;
 
-        public Task<RequestPathResponse> Execute(EmptyRequest request)
-            => Task.FromResult(new RequestPathResponse() { RequestPath = Accessor.HttpContext.Request.Path });
+        public Task<CustomRequestPathResponse> Execute(EmptyRequest request)
+            => Task.FromResult(new CustomRequestPathResponse() { RequestPath = Accessor.HttpContext.Request.Path });
     }
 }

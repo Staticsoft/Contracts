@@ -23,7 +23,10 @@ namespace Staticsoft.Contracts.ASP
         }
 
         public static IEnumerable<HttpEndpointMetadata> GetMetadata(Type type)
-            => type.GetProperties().SelectMany(GetMetadata);
+            => GetMetadata(type, string.Empty);
+
+        static IEnumerable<HttpEndpointMetadata> GetMetadata(Type type, string basePattern)
+            => type.GetProperties().SelectMany(property => GetMetadata(property, basePattern));
 
         static IEnumerable<HttpEndpointMetadata> GetDuplicates(IEnumerable<HttpEndpointMetadata> metadatas)
         {
@@ -37,16 +40,16 @@ namespace Staticsoft.Contracts.ASP
             }
         }
 
-        static IEnumerable<HttpEndpointMetadata> GetMetadata(PropertyInfo property)
+        static IEnumerable<HttpEndpointMetadata> GetMetadata(PropertyInfo property, string basePattern)
             => property.PropertyType.IsGenericTypeOf(HttpEndpointType)
             || property.PropertyType.IsGenericTypeOf(ParametrizedHttpEndpointType)
-            ? new[] { CreateMetadata(property) }
-            : GetMetadata(property.PropertyType);
+            ? new[] { CreateMetadata(property, basePattern) }
+            : GetMetadata(property.PropertyType, $"{basePattern}/{property.Name}");
 
-        static HttpEndpointMetadata CreateMetadata(PropertyInfo property)
+        static HttpEndpointMetadata CreateMetadata(PropertyInfo property, string basePattern)
         {
             var (requestType, responseType) = GetRequestResponseTypes(property.PropertyType);
-            return CreateMetadata(property, requestType, responseType);
+            return CreateMetadata(property, basePattern, requestType, responseType);
         }
 
         static (Type, Type) GetRequestResponseTypes(Type type)
@@ -55,9 +58,9 @@ namespace Staticsoft.Contracts.ASP
         static (Type, Type) GetRequestResponseTypes(Type[] types)
             => (types.First(), types.Last());
 
-        static HttpEndpointMetadata CreateMetadata(PropertyInfo property, Type requestType, Type responseType)
+        static HttpEndpointMetadata CreateMetadata(PropertyInfo property, string basePattern, Type requestType, Type responseType)
             => typeof(ReflectionHttpEndpointMetadata<,>).MakeGenericType(requestType, responseType).GetConstructor()
-                .Invoke(new[] { property }) as HttpEndpointMetadata;
+                .Invoke(new object[] { property, basePattern }) as HttpEndpointMetadata;
 
         static Type MakeHttpEndpointMetadata(HttpEndpointMetadata metadata)
             => typeof(HttpEndpointMetadata<,>).MakeGenericType(metadata.RequestBodyType, metadata.ResponseBodyType);

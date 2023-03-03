@@ -33,7 +33,7 @@ namespace Staticsoft.Contracts.Tests
                 .UseClientAPI<TestAPI>()
                 .UseSystemJsonSerializer()
                 .UseJsonHttpCommunication()
-                .AddScoped(_ => Get<HttpClient>())
+                .AddSingleton(Get<HttpClient>())
                 .DecorateSingleton<EndpointRequestFactory, UseAuthenticationDecorator>()
                 .AddSingleton<Authentication>(Get<AuthenticationFake>());
 

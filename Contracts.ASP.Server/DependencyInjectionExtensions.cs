@@ -21,9 +21,9 @@ namespace Staticsoft.Contracts.ASP.Server
         public static IServiceCollection UseServerAPI<TAPI>(this IServiceCollection services, Assembly assembly)
             where TAPI : class
             => services
-                .AddSingleton<HttpRequestHandler, EndpointRequestHandler>()
-                .AddSingleton<HttpEndpointFactory, DependencyInjectionHttpRequestHandlerFactory>()
-                .AddSingleton<ParametrizedHttpEndpointFactory, DependencyInjectionParametrizedHttpRequestHandlerFactory>()
+                .AddScoped<HttpRequestHandler, EndpointRequestHandler>()
+                .AddScoped<HttpEndpointFactory, DependencyInjectionHttpRequestHandlerFactory>()
+                .AddScoped<ParametrizedHttpEndpointFactory, DependencyInjectionParametrizedHttpRequestHandlerFactory>()
                 .AddEndpoints<TAPI>(HttpEndpointMetadataAccessor.GetMetadata(typeof(TAPI)), assembly);
 
         static IServiceCollection AddEndpoints<TAPI>(this IServiceCollection services, IEnumerable<HttpEndpointMetadata> metadata, Assembly assembly)
@@ -68,7 +68,7 @@ namespace Staticsoft.Contracts.ASP.Server
             => nonImplementedMetadatas.Any()
             ? throw new Exception($"No endpoint implementation found for metadatas: {string.Join(", ", nonImplementedMetadatas)}")
             : implementations.Keys
-                .Aggregate(services, (services, endpoint) => services.AddSingleton(endpoint, implementations[endpoint]));
+                .Aggregate(services, (services, endpoint) => services.AddScoped(endpoint, implementations[endpoint]));
 
         public static IApplicationBuilder UseServerAPIRouting<TAPI>(this IApplicationBuilder builder)
             where TAPI : class

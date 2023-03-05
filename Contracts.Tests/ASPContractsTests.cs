@@ -21,11 +21,11 @@ namespace Staticsoft.Contracts.Tests
             .UseJsonHttpCommunication();
     }
 
-    public class ASPContractsTests : TestBase<IntegrationServices>
+    public class ASPContractsTestsBase : TestBase<IntegrationServices>
     {
         readonly IServiceProvider Provider;
 
-        public ASPContractsTests()
+        public ASPContractsTestsBase()
             => Provider = Services.BuildServiceProvider();
 
         protected virtual IServiceCollection Services
@@ -42,7 +42,10 @@ namespace Staticsoft.Contracts.Tests
 
         protected T Service<T>()
             => Provider.GetRequiredService<T>();
+    }
 
+    public class ASPContractsTests : ASPContractsTestsBase
+    {
         [Fact]
         public async Task CanMakeRequest()
         {
@@ -86,14 +89,14 @@ namespace Staticsoft.Contracts.Tests
         public async Task CanMakeRequestToEndpointWithCustomPath()
         {
             var response = await API.TestGroup.CustomPathEndpoint.Execute();
-            Assert.Equal($"/{nameof(API.TestGroup)}/custom", response.RequestPath);
+            Assert.Equal($"/{nameof(API.TestGroup)}/custom/", response.RequestPath);
         }
 
         [Fact]
         public async Task MakesRequestToNestedPathEndpoint()
         {
             var response = await API.TestGroup.Nested.NestedEndpoint.Execute();
-            Assert.Equal($"/{nameof(API.TestGroup)}/{nameof(API.TestGroup.Nested)}/{nameof(API.TestGroup.Nested.NestedEndpoint)}", response.RequestPath);
+            Assert.Equal($"/{nameof(API.TestGroup)}/{nameof(API.TestGroup.Nested)}/{nameof(API.TestGroup.Nested.NestedEndpoint)}/", response.RequestPath);
         }
     }
 }

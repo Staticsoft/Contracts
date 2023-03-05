@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Staticsoft.Contracts.Tests
 {
-    public class CustomStatusCodeASPContractsTests : ASPContractsTests
+    public class CustomStatusCodeASPContractsTests : ASPContractsTestsBase
     {
         protected override IServiceCollection Services => base.Services
             .DecorateSingleton<HttpResultHandler, CustomStatusCodeResultHandler>();

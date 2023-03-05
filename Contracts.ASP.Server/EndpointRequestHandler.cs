@@ -3,6 +3,7 @@ using Staticsoft.Contracts.Abstractions;
 using Staticsoft.Serialization.Abstractions;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,18 +35,22 @@ namespace Staticsoft.Contracts.ASP.Server
         ) => metadata.Request.Pattern.Type switch
         {
             PatternType.Static => ExecuteStaticRequest<RequestBody, ResponseBody>(request),
-            PatternType.Parametrized => ExecuteParametrizedRequest<RequestBody, ResponseBody>(request, context),
+            PatternType.Parametrized => ExecuteParametrizedRequest<RequestBody, ResponseBody>(request, context, metadata),
             _ => throw new NotSupportedException($"{nameof(PatternType)} {metadata.Request.Pattern.Type} is not supported")
         };
 
         Task<ResponseBody> ExecuteStaticRequest<RequestBody, ResponseBody>(RequestBody request)
             => Endpoint.Resolve<RequestBody, ResponseBody>().Execute(request);
 
-        Task<ResponseBody> ExecuteParametrizedRequest<RequestBody, ResponseBody>(RequestBody request, HttpContext context)
-            => ParametrizedEndpoint.Resolve<RequestBody, ResponseBody>().Execute(GetParameter(context.Request.Path), request);
+        Task<ResponseBody> ExecuteParametrizedRequest<RequestBody, ResponseBody>(RequestBody request, HttpContext context, HttpEndpointMetadata metadata)
+            => ParametrizedEndpoint.Resolve<RequestBody, ResponseBody>().Execute(GetParameter(context.Request.Path, metadata), request);
 
-        static string GetParameter(string requestPath)
-            => requestPath[(requestPath.LastIndexOf('/') + 1)..];
+        static string GetParameter(string requestPath, HttpEndpointMetadata metadata)
+        {
+            var sections = metadata.Request.Pattern.Value.Split('/').Select((section, index) => new { Value = section, Index = index });
+            var parameterSection = sections.Single(section => section.Value == "{parameter}");
+            return requestPath.Split('/')[parameterSection.Index];
+        }
 
         async Task<RequestBody> ReadRequest<RequestBody>(HttpContext context)
         {

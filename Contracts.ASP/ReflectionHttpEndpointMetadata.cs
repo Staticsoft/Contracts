@@ -47,7 +47,7 @@ namespace Staticsoft.Contracts.ASP
             : PatternType.Static;
 
         static string GetPattern(PropertyInfo property, string basePattern, PatternType type)
-            => $"{basePattern}/{GetEndpointPattern(property, type)}";
+            => $"{basePattern}/{GetEndpointPattern(property, type)}/";
 
         static string GetEndpointPattern(PropertyInfo property, PatternType type)
         {

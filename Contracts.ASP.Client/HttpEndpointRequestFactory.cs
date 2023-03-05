@@ -13,9 +13,10 @@ namespace Staticsoft.Contracts.ASP.Client
         public HttpRequest Create(HttpEndpointMetadata metadata, string path, object body)
             => Create(metadata.GetAttribute<EndpointAttribute>().Method, path, body);
 
-        HttpRequest Create(HttpMethod method, string path, object body)
-            => method == HttpMethod.Get
-            ? Factory.Create(method, path)
-            : Factory.Create(method, path, body);
+        HttpRequest Create(HttpMethod method, string path, object body) => body switch
+        {
+            EmptyRequest => Factory.Create(method, path),
+            _ => Factory.Create(method, path, body)
+        };
     }
 }

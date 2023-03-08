@@ -15,6 +15,8 @@ namespace Staticsoft.TestServer
             => Handler = handler;
 
         public Task Execute<RequestBody, ResponseBody>(HttpContext context, HttpEndpointMetadata metadata)
+            where RequestBody : class, new()
+            where ResponseBody : class, new()
         {
             if (metadata.HasAttribute<AuthenticateRequestAttribute>())
             {

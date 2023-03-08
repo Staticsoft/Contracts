@@ -20,6 +20,8 @@ namespace Staticsoft.Contracts.ASP.Server
             = (serializer, factory, parametrizedEndpoint);
 
         public async Task Execute<RequestBody, ResponseBody>(HttpContext context, HttpEndpointMetadata metadata)
+            where RequestBody : class, new()
+            where ResponseBody : class, new()
         {
             var request = await ReadRequest<RequestBody>(context);
 
@@ -53,8 +55,9 @@ namespace Staticsoft.Contracts.ASP.Server
         }
 
         async Task<RequestBody> ReadRequest<RequestBody>(HttpContext context)
+            where RequestBody : class, new()
         {
-            if (typeof(RequestBody) == typeof(EmptyRequest)) return (RequestBody)(object)new EmptyRequest();
+            if (typeof(RequestBody).IsAssignableTo(typeof(EmptyRequest))) return new();
 
             using var reader = new StreamReader(context.Request.Body, Encoding.UTF8);
             var requestText = await reader.ReadToEndAsync();

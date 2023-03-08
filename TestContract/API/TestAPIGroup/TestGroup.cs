@@ -8,6 +8,7 @@ namespace Staticsoft.TestContract
         public TestGroup(
             HttpEndpoint<TestRequest, TestResponse> testEndpoint,
             HttpEndpoint<EmptyRequest, EmptyResponse> emptyEndpoint,
+            HttpEndpoint<EmptyRequestProxy, EmptyResponse> emptyEndpointProxy,
             HttpEndpoint<SameNameRequest, SameNameResponse> sameNameEndpoint,
             ParametrizedHttpEndpoint<EmptyRequest, RequestParameterResponse> emptyParametrizedEndpoint,
             HttpEndpoint<EmptyRequest, CustomRequestPathResponse> customPathEndpoint,
@@ -17,6 +18,7 @@ namespace Staticsoft.TestContract
         {
             TestEndpoint = testEndpoint;
             EmptyEndpoint = emptyEndpoint;
+            EmptyEndpointProxy = emptyEndpointProxy;
             SameNameEndpoint = sameNameEndpoint;
             EmptyParametrizedEndpoint = emptyParametrizedEndpoint;
             CustomPathEndpoint = customPathEndpoint;
@@ -30,6 +32,9 @@ namespace Staticsoft.TestContract
 
         [Endpoint(HttpMethod.Get)]
         public HttpEndpoint<EmptyRequest, EmptyResponse> EmptyEndpoint { get; }
+
+        [Endpoint(HttpMethod.Get)]
+        public HttpEndpoint<EmptyRequestProxy, EmptyResponse> EmptyEndpointProxy { get; }
 
         [Endpoint(HttpMethod.Post)]
         public HttpEndpoint<SameNameRequest, SameNameResponse> SameNameEndpoint { get; }

@@ -2,6 +2,6 @@
 {
     public class EmptyRequest
     {
-        public static EmptyRequest Empty = new EmptyRequest();
+        public static readonly EmptyRequest Empty = new();
     }
 }

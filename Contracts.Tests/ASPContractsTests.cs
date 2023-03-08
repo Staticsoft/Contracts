@@ -98,5 +98,11 @@ namespace Staticsoft.Contracts.Tests
             var response = await API.TestGroup.Nested.NestedEndpoint.Execute();
             Assert.Equal($"/{nameof(API.TestGroup)}/{nameof(API.TestGroup.Nested)}/{nameof(API.TestGroup.Nested.NestedEndpoint)}/", response.RequestPath);
         }
+
+        [Fact]
+        public async Task CanImplementProxyEndpoint()
+        {
+            await API.TestGroup.EmptyEndpointProxy.Execute();
+        }
     }
 }

@@ -102,7 +102,7 @@ namespace Staticsoft.Contracts.Tests
         [Fact]
         public async Task CanImplementProxyEndpoint()
         {
-            await API.TestGroup.EmptyEndpointProxy.Execute(new());
+            await API.TestGroup.EmptyEndpointProxy.Execute();
         }
     }
 }

@@ -4,44 +4,26 @@ using Staticsoft.Contracts.ASP.Client;
 using Staticsoft.HttpCommunication.Json;
 using Staticsoft.Serialization.Net;
 using Staticsoft.TestContract;
-using Staticsoft.Testing;
+using Staticsoft.Testing.Integration;
 using Staticsoft.TestServer;
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Staticsoft.Contracts.Tests;
 
-public class IntegrationServices : IntegrationServicesBase<TestStartup>
+public class ASPContractsTestsBase : IntegrationTestBase<TestStartup>
 {
-    protected override IServiceCollection Services => base.Services
-        .AddSingleton<AuthenticationFake>()
+    protected override IServiceCollection ClientServices(IServiceCollection services) => base.ClientServices(services)
+        .UseClientAPI<TestAPI>()
         .UseSystemJsonSerializer()
-        .UseJsonHttpCommunication();
-}
-
-public class ASPContractsTestsBase : TestBase<IntegrationServices>
-{
-    readonly IServiceProvider Provider;
-
-    public ASPContractsTestsBase()
-        => Provider = Services.BuildServiceProvider();
-
-    protected virtual IServiceCollection Services
-        => new ServiceCollection()
-            .UseClientAPI<TestAPI>()
-            .UseSystemJsonSerializer()
-            .UseJsonHttpCommunication()
-            .AddSingleton(Get<HttpClient>())
-            .DecorateSingleton<EndpointRequestFactory, UseAuthenticationDecorator>()
-            .AddSingleton<Authentication>(Get<AuthenticationFake>());
+        .UseJsonHttpCommunication()
+        .Decorate<EndpointRequestFactory, UseAuthenticationDecorator>()
+        .AddSingleton<AuthenticationFake>()
+        .ReuseSingleton<Authentication, AuthenticationFake>();
 
     protected TestAPI API
-        => Service<TestAPI>();
-
-    protected T Service<T>()
-        => Provider.GetRequiredService<T>();
+        => Client<TestAPI>();
 }
 
 public class ASPContractsTests : ASPContractsTestsBase
@@ -55,7 +37,7 @@ public class ASPContractsTests : ASPContractsTestsBase
     [Fact]
     public async Task CanMakeRequestWithBodyAndHeaders()
     {
-        Get<AuthenticationFake>().Value = "TestUser";
+        Client<AuthenticationFake>().Value = "TestUser";
         var result = await API.TestGroup.TestEndpoint.Execute(new TestRequest { TestInput = "Test" });
         Assert.Equal("Test", result.TestOutput);
     }
@@ -63,7 +45,7 @@ public class ASPContractsTests : ASPContractsTestsBase
     [Fact]
     public async Task ThrowsErrorOnDecoratedRequest()
     {
-        Get<AuthenticationFake>().Value = string.Empty;
+        Client<AuthenticationFake>().Value = string.Empty;
         await Assert.ThrowsAsync<HttpResultHandlerException>(() => API.TestGroup.TestEndpoint.Execute(new TestRequest { TestInput = "Test" }));
     }
 

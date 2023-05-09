@@ -8,11 +8,11 @@ namespace Staticsoft.Contracts.Tests;
 
 public class CustomStatusCodeASPContractsTests : ASPContractsTestsBase
 {
-    protected override IServiceCollection Services => base.Services
-        .DecorateSingleton<HttpResultHandler, CustomStatusCodeResultHandler>();
+    protected override IServiceCollection ClientServices(IServiceCollection services) => base.ClientServices(services)
+        .Decorate<HttpResultHandler, CustomStatusCodeResultHandler>();
 
     CustomStatusCodeResultHandler Handler
-        => Service<HttpResultHandler>() as CustomStatusCodeResultHandler;
+        => Client<HttpResultHandler>() as CustomStatusCodeResultHandler;
 
     [Fact]
     public async Task CanHandleRequestWithCustomStatusCode()

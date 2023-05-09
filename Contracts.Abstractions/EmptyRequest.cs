@@ -1,7 +1,6 @@
-﻿namespace Staticsoft.Contracts.Abstractions
+﻿namespace Staticsoft.Contracts.Abstractions;
+
+public class EmptyRequest
 {
-    public class EmptyRequest
-    {
-        public static readonly EmptyRequest Empty = new();
-    }
+    public static readonly EmptyRequest Empty = new();
 }

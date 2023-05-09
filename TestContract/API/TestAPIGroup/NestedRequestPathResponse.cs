@@ -1,7 +1,6 @@
-﻿namespace Staticsoft.TestContract
+﻿namespace Staticsoft.TestContract;
+
+public class NestedRequestPathResponse
 {
-    public class NestedRequestPathResponse
-    {
-        public string RequestPath { get; init; }
-    }
+    public string RequestPath { get; init; }
 }

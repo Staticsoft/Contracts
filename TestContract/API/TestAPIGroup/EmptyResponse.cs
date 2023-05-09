@@ -1,4 +1,3 @@
-﻿namespace Staticsoft.TestContract
-{
-    public class EmptyResponse { }
-}
+﻿namespace Staticsoft.TestContract;
+
+public class EmptyResponse { }

@@ -3,28 +3,27 @@ using Staticsoft.Contracts.ASP.Client;
 using Staticsoft.HttpCommunication.Abstractions;
 using Staticsoft.TestContract;
 
-namespace Staticsoft.Contracts.Tests
+namespace Staticsoft.Contracts.Tests;
+
+public class UseAuthenticationDecorator : EndpointRequestFactory
 {
-    public class UseAuthenticationDecorator : EndpointRequestFactory
+    readonly EndpointRequestFactory Factory;
+    readonly Authentication Authentication;
+
+    public UseAuthenticationDecorator(EndpointRequestFactory factory, Authentication authentication)
     {
-        readonly EndpointRequestFactory Factory;
-        readonly Authentication Authentication;
-
-        public UseAuthenticationDecorator(EndpointRequestFactory factory, Authentication authentication)
-        {
-            Factory = factory;
-            Authentication = authentication;
-        }
-
-        public HttpRequest Create(HttpEndpointMetadata metadata, string path, object body)
-            => Create(metadata, Factory.Create(metadata, path, body));
-
-        HttpRequest Create(HttpEndpointMetadata metadata, HttpRequest request)
-            => metadata.HasAttribute<AuthenticateRequestAttribute>()
-            ? Decorate(request)
-            : request;
-
-        HttpRequest Decorate(HttpRequest request)
-            => request.WithHeader(Authentication.Get().Name, Authentication.Get().Value);
+        Factory = factory;
+        Authentication = authentication;
     }
+
+    public HttpRequest Create(HttpEndpointMetadata metadata, string path, object body)
+        => Create(metadata, Factory.Create(metadata, path, body));
+
+    HttpRequest Create(HttpEndpointMetadata metadata, HttpRequest request)
+        => metadata.HasAttribute<AuthenticateRequestAttribute>()
+        ? Decorate(request)
+        : request;
+
+    HttpRequest Decorate(HttpRequest request)
+        => request.WithHeader(Authentication.Get().Name, Authentication.Get().Value);
 }

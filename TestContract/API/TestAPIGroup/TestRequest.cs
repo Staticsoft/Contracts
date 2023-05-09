@@ -1,7 +1,6 @@
-﻿namespace Staticsoft.TestContract
+﻿namespace Staticsoft.TestContract;
+
+public class TestRequest
 {
-    public class TestRequest
-    {
-        public string TestInput { get; init; }
-    }
+    public string TestInput { get; init; }
 }

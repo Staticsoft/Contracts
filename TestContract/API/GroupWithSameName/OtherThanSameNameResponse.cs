@@ -1,7 +1,6 @@
-﻿namespace Staticsoft.TestContract
+﻿namespace Staticsoft.TestContract;
+
+public class OtherThanSameNameResponse
 {
-    public class OtherThanSameNameResponse
-    {
-        public string OtherOutput { get; init; }
-    }
+    public string OtherOutput { get; init; }
 }

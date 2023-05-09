@@ -1,7 +1,6 @@
-﻿namespace Staticsoft.TestContract
+﻿namespace Staticsoft.TestContract;
+
+public class RequestParameterResponse
 {
-    public class RequestParameterResponse
-    {
-        public string Parameter { get; init; }
-    }
+    public string Parameter { get; init; }
 }

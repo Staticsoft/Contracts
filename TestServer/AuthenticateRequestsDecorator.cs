@@ -5,36 +5,35 @@ using Staticsoft.TestContract;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Staticsoft.TestServer
+namespace Staticsoft.TestServer;
+
+public class AuthenticateRequestsDecorator : HttpRequestHandler
 {
-    public class AuthenticateRequestsDecorator : HttpRequestHandler
+    readonly HttpRequestHandler Handler;
+
+    public AuthenticateRequestsDecorator(HttpRequestHandler handler)
+        => Handler = handler;
+
+    public Task Execute<RequestBody, ResponseBody>(HttpContext context, HttpEndpointMetadata metadata)
+        where RequestBody : class, new()
+        where ResponseBody : class, new()
     {
-        readonly HttpRequestHandler Handler;
-
-        public AuthenticateRequestsDecorator(HttpRequestHandler handler)
-            => Handler = handler;
-
-        public Task Execute<RequestBody, ResponseBody>(HttpContext context, HttpEndpointMetadata metadata)
-            where RequestBody : class, new()
-            where ResponseBody : class, new()
+        if (metadata.HasAttribute<AuthenticateRequestAttribute>())
         {
-            if (metadata.HasAttribute<AuthenticateRequestAttribute>())
+            var authentication = GetAuthentication(context);
+            if (string.IsNullOrWhiteSpace(authentication))
             {
-                var authentication = GetAuthentication(context);
-                if (string.IsNullOrWhiteSpace(authentication))
-                {
-                    context.Response.StatusCode = 401;
-                    return Task.CompletedTask;
-                }
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
             }
-
-            return Handler.Execute<RequestBody, ResponseBody>(context, metadata);
         }
 
-        static string GetAuthentication(HttpContext context)
-            => context.Request.Headers.TryGetValue("Authentication", out var values)
-            ? values.Single()
-            : string.Empty;
-
+        return Handler.Execute<RequestBody, ResponseBody>(context, metadata);
     }
+
+    static string GetAuthentication(HttpContext context)
+        => context.Request.Headers.TryGetValue("Authentication", out var values)
+        ? values.Single()
+        : string.Empty;
+
 }

@@ -13,19 +13,19 @@ public static class DependencyInjectionExtensions
 
     public static IServiceCollection UseClientAPI<TAPI>(this IServiceCollection services) where TAPI : class
         => services
-            .AddScoped<TAPI>()
+            .AddSingleton<TAPI>()
             .AddGroups<TAPI>()
-            .AddScoped(HttpEndpointType, typeof(HttpEndpointAccessor<,>))
-            .AddScoped(ParametrizedHttpEndpointType, typeof(HttpEndpointAccessor<,>))
-            .AddScoped<HttpResultHandler, StatusCodeResultHandler>()
-            .AddScoped<EndpointRequestFactory, HttpEndpointRequestFactory>()
+            .AddSingleton(HttpEndpointType, typeof(HttpEndpointAccessor<,>))
+            .AddSingleton(ParametrizedHttpEndpointType, typeof(HttpEndpointAccessor<,>))
+            .AddSingleton<HttpResultHandler, StatusCodeResultHandler>()
+            .AddSingleton<EndpointRequestFactory, HttpEndpointRequestFactory>()
             .AddMetadata(HttpEndpointMetadataAccessor.GetMetadata(typeof(TAPI)));
 
     static IServiceCollection AddMetadata(this IServiceCollection services, IEnumerable<HttpEndpointMetadata> metadata)
         => HttpEndpointMetadataAccessor.AddMetadata(services, metadata);
 
     static IServiceCollection AddGroups<TAPI>(this IServiceCollection services)
-        => GetGroupTypes(typeof(TAPI)).Aggregate(services, (services, type) => services.AddScoped(type));
+        => GetGroupTypes(typeof(TAPI)).Aggregate(services, (services, type) => services.AddSingleton(type));
 
     static IEnumerable<Type> GetGroupTypes(Type type)
         => GetConstructorParametersTypes(type).SelectMany(parameterType =>

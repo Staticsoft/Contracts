@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace Staticsoft.Contracts.Abstractions
+namespace Staticsoft.Contracts.Abstractions;
+
+public interface HttpEndpoint<RequestBody, ResponseBody>
 {
-    public interface HttpEndpoint<RequestBody, ResponseBody>
-    {
-        Task<ResponseBody> Execute(RequestBody request);
-    }
+    Task<ResponseBody> Execute(RequestBody request);
 }

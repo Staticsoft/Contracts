@@ -12,4 +12,7 @@
     <ProjectReference Include="..\TestContract\TestContract.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Staticsoft.Serialization.Net" Version="1.0.0-7" />
+  </ItemGroup>
 </Project>

@@ -1,9 +1,8 @@
 ﻿using Staticsoft.Contracts.Abstractions;
 
-namespace Staticsoft.Contracts.ASP.Server
+namespace Staticsoft.Contracts.ASP.Server;
+
+public interface ParametrizedHttpEndpointFactory
 {
-    public interface ParametrizedHttpEndpointFactory
-    {
-        ParametrizedHttpEndpoint<RequestBody, ResponseBody> Resolve<RequestBody, ResponseBody>();
-    }
+    ParametrizedHttpEndpoint<RequestBody, ResponseBody> Resolve<RequestBody, ResponseBody>();
 }

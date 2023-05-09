@@ -1,4 +1,3 @@
-﻿namespace Staticsoft.TestContract
-{
-    public class CustomStatusCodeResponse { }
-}
+﻿namespace Staticsoft.TestContract;
+
+public class CustomStatusCodeResponse { }

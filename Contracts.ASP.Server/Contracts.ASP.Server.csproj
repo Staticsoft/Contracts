@@ -11,9 +11,9 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Staticsoft.Extensions.DependencyInjection" Version="1.0.0-2" />
-    <PackageReference Include="Staticsoft.Serialization.Abstractions" Version="1.0.0-6" />
-    <PackageReference Include="Staticsoft.TryReturn" Version="1.0.0-6" />
+    <PackageReference Include="Staticsoft.Extensions.DependencyInjection" Version="1.0.0-3" />
+    <PackageReference Include="Staticsoft.Serialization.Abstractions" Version="1.0.0-7" />
+    <PackageReference Include="Staticsoft.TryReturn" Version="1.0.0-7" />
   </ItemGroup>
   
   <ItemGroup>

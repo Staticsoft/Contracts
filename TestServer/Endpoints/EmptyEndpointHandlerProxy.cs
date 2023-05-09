@@ -2,16 +2,15 @@
 using Staticsoft.TestContract;
 using System.Threading.Tasks;
 
-namespace Staticsoft.TestServer
+namespace Staticsoft.TestServer;
+
+public class EmptyEndpointHandlerProxy : HttpEndpoint<EmptyRequestProxy, EmptyResponse>
 {
-    public class EmptyEndpointHandlerProxy : HttpEndpoint<EmptyRequestProxy, EmptyResponse>
-    {
-        readonly HttpEndpoint<EmptyRequest, EmptyResponse> Endpoint;
+    readonly HttpEndpoint<EmptyRequest, EmptyResponse> Endpoint;
 
-        public EmptyEndpointHandlerProxy(HttpEndpoint<EmptyRequest, EmptyResponse> endpoint)
-            => Endpoint = endpoint;
+    public EmptyEndpointHandlerProxy(HttpEndpoint<EmptyRequest, EmptyResponse> endpoint)
+        => Endpoint = endpoint;
 
-        public Task<EmptyResponse> Execute(EmptyRequestProxy request)
-            => Endpoint.Execute(request);
-    }
+    public Task<EmptyResponse> Execute(EmptyRequestProxy request)
+        => Endpoint.Execute(request);
 }

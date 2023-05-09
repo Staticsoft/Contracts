@@ -1,8 +1,7 @@
-﻿namespace Staticsoft.Contracts.ASP
+﻿namespace Staticsoft.Contracts.ASP;
+
+public enum PatternType
 {
-    public enum PatternType
-    {
-        Static,
-        Parametrized
-    }
+    Static,
+    Parametrized
 }

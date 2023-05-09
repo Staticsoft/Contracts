@@ -1,7 +1,6 @@
-﻿namespace Staticsoft.Contracts.Tests
+﻿namespace Staticsoft.Contracts.Tests;
+
+public interface Authentication
 {
-    public interface Authentication
-    {
-        AuthenticationHeaders Get();
-    }
+    AuthenticationHeaders Get();
 }

@@ -2,16 +2,15 @@
 using Staticsoft.Contracts.Abstractions;
 using System;
 
-namespace Staticsoft.Contracts.ASP.Server
+namespace Staticsoft.Contracts.ASP.Server;
+
+public class DependencyInjectionHttpRequestHandlerFactory : HttpEndpointFactory
 {
-    public class DependencyInjectionHttpRequestHandlerFactory : HttpEndpointFactory
-    {
-        readonly IServiceProvider Provider;
+    readonly IServiceProvider Provider;
 
-        public DependencyInjectionHttpRequestHandlerFactory(IServiceProvider provider)
-            => Provider = provider;
+    public DependencyInjectionHttpRequestHandlerFactory(IServiceProvider provider)
+        => Provider = provider;
 
-        public HttpEndpoint<RequestBody, ResponseBody> Resolve<RequestBody, ResponseBody>()
-            => Provider.GetRequiredService<HttpEndpoint<RequestBody, ResponseBody>>();
-    }
+    public HttpEndpoint<RequestBody, ResponseBody> Resolve<RequestBody, ResponseBody>()
+        => Provider.GetRequiredService<HttpEndpoint<RequestBody, ResponseBody>>();
 }

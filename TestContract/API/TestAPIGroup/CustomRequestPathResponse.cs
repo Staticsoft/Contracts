@@ -1,7 +1,6 @@
-﻿namespace Staticsoft.TestContract
+﻿namespace Staticsoft.TestContract;
+
+public class CustomRequestPathResponse
 {
-    public class CustomRequestPathResponse
-    {
-        public string RequestPath { get; init; }
-    }
+    public string RequestPath { get; init; }
 }

@@ -70,9 +70,6 @@ public class EndpointRequestHandler : HttpRequestHandler
         {
             context.Response.StatusCode = behavior.StatusCode;
         }
-
-        context.Response.ContentType = "application/json";
-
         var responseText = Serializer.Serialize(response);
         await context.Response.WriteAsync(responseText, Encoding.UTF8);
     }

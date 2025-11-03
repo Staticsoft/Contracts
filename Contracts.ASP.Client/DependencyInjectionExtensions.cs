@@ -10,6 +10,8 @@ public static class DependencyInjectionExtensions
 {
     static readonly Type HttpEndpointType = typeof(HttpEndpoint<,>);
     static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
+    static readonly Type StreamableHttpEndpointType = typeof(StreamableHttpEndpoint<>);
+    static readonly Type StreamableParametrizedHttpEndpointType = typeof(StreamableParametrizedHttpEndpoint<>);
 
     public static IServiceCollection UseClientAPI<TAPI>(this IServiceCollection services) where TAPI : class
         => services
@@ -17,6 +19,8 @@ public static class DependencyInjectionExtensions
             .AddGroups<TAPI>()
             .AddSingleton(HttpEndpointType, typeof(HttpEndpointAccessor<,>))
             .AddSingleton(ParametrizedHttpEndpointType, typeof(HttpEndpointAccessor<,>))
+            .AddSingleton(StreamableHttpEndpointType, typeof(StreamableHttpEndpointAccessor<>))
+            .AddSingleton(StreamableParametrizedHttpEndpointType, typeof(StreamableHttpEndpointAccessor<>))
             .AddSingleton<HttpResultHandler, StatusCodeResultHandler>()
             .AddSingleton<EndpointRequestFactory, HttpEndpointRequestFactory>()
             .AddMetadata(HttpEndpointMetadataAccessor.GetMetadata(typeof(TAPI)));
@@ -31,7 +35,7 @@ public static class DependencyInjectionExtensions
         => GetConstructorParametersTypes(type).SelectMany(parameterType =>
             IsConcreteType(parameterType)
             ? new[] { parameterType }.Concat(GetGroupTypes(parameterType))
-            : Array.Empty<Type>()
+            : []
         );
 
     static IEnumerable<Type> GetConstructorParametersTypes(Type type)

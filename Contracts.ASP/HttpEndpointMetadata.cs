@@ -27,3 +27,5 @@ public class ResponseMetadata
 {
     public Type BodyType { get; init; }
 }
+
+public class StreamableResponseMetadata { }

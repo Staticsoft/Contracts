@@ -3,13 +3,10 @@ using Staticsoft.HttpCommunication.Abstractions;
 
 namespace Staticsoft.TestContract;
 
-public class GroupWithSameEndpointName
+public class GroupWithSameEndpointName(
+    HttpEndpoint<OtherThanSameNameRequest, OtherThanSameNameResponse> sameNameEndpoint
+)
 {
-    public GroupWithSameEndpointName(
-        HttpEndpoint<OtherThanSameNameRequest, OtherThanSameNameResponse> sameNameEndpoint
-    )
-        => SameNameEndpoint = sameNameEndpoint;
-
     [Endpoint(HttpMethod.Post)]
-    public HttpEndpoint<OtherThanSameNameRequest, OtherThanSameNameResponse> SameNameEndpoint { get; }
+    public HttpEndpoint<OtherThanSameNameRequest, OtherThanSameNameResponse> SameNameEndpoint { get; } = sameNameEndpoint;
 }

@@ -4,12 +4,11 @@ using System;
 
 namespace Staticsoft.Contracts.ASP.Server;
 
-public class DependencyInjectionParametrizedHttpRequestHandlerFactory : ParametrizedHttpEndpointFactory
+public class DependencyInjectionParametrizedHttpRequestHandlerFactory(
+    IServiceProvider provider
+) : ParametrizedHttpEndpointFactory
 {
-    readonly IServiceProvider Provider;
-
-    public DependencyInjectionParametrizedHttpRequestHandlerFactory(IServiceProvider provider)
-        => Provider = provider;
+    readonly IServiceProvider Provider = provider;
 
     public ParametrizedHttpEndpoint<RequestBody, ResponseBody> Resolve<RequestBody, ResponseBody>()
         => Provider.GetRequiredService<ParametrizedHttpEndpoint<RequestBody, ResponseBody>>();

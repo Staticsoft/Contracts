@@ -16,14 +16,20 @@ public static class DependencyInjectionExtensions
 {
     static readonly Type HttpEndpointType = typeof(HttpEndpoint<,>);
     static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
+    static readonly Type StreamableHttpEndpointType = typeof(StreamableHttpEndpoint<>);
+    static readonly Type StreamableParametrizedHttpEndpointType = typeof(StreamableParametrizedHttpEndpoint<>);
     static readonly Type HttpRequestHandlerType = typeof(HttpRequestHandler);
+    static readonly Type StreamableHttpRequestHandlerType = typeof(StreamableHttpRequestHandler);
 
     public static IServiceCollection UseServerAPI<TAPI>(this IServiceCollection services, Assembly assembly)
         where TAPI : class
         => services
             .AddScoped<HttpRequestHandler, EndpointRequestHandler>()
+            .AddScoped<StreamableHttpRequestHandler, StreamableEndpointRequestHandler>()
             .AddScoped<HttpEndpointFactory, DependencyInjectionHttpRequestHandlerFactory>()
             .AddScoped<ParametrizedHttpEndpointFactory, DependencyInjectionParametrizedHttpRequestHandlerFactory>()
+            .AddScoped<StreamableHttpEndpointFactory, DependencyInjectionStreamableHttpEndpointFactory>()
+            .AddScoped<StreamableParametrizedHttpEndpointFactory, DependencyInjectionStreamableParametrizedHttpEndpointFactory>()
             .AddEndpoints<TAPI>(HttpEndpointMetadataAccessor.GetMetadata(typeof(TAPI)), assembly);
 
     static IServiceCollection AddEndpoints<TAPI>(this IServiceCollection services, IEnumerable<HttpEndpointMetadata> metadata, Assembly assembly)
@@ -38,7 +44,9 @@ public static class DependencyInjectionExtensions
 
     static bool IsHttpEndpointInterface(Type interfaceType)
         => interfaceType.IsGenericTypeOf(HttpEndpointType)
-        || interfaceType.IsGenericTypeOf(ParametrizedHttpEndpointType);
+        || interfaceType.IsGenericTypeOf(ParametrizedHttpEndpointType)
+        || interfaceType.IsGenericTypeOf(StreamableHttpEndpointType)
+        || interfaceType.IsGenericTypeOf(StreamableParametrizedHttpEndpointType);
 
     static IServiceCollection RegisterEndpointsImplementations(
         this IServiceCollection services,
@@ -53,16 +61,23 @@ public static class DependencyInjectionExtensions
     )
         => metadatas.Where(metadata => NotImplementedEndpoint(implementations, metadata));
 
-    static bool NotImplementedEndpoint(Dictionary<Type, Type> implementations, HttpEndpointMetadata metadata) => metadata.Request.Pattern.Type switch
-    {
-        PatternType.Static => !implementations.ContainsKey(HttpEndpointType.MakeGenericType(metadata.Request.BodyType, metadata.Response.BodyType)),
-        PatternType.Parametrized => !implementations.ContainsKey(ParametrizedHttpEndpointType.MakeGenericType(metadata.Request.BodyType, metadata.Response.BodyType)),
-        _ => throw new NotSupportedException($"{nameof(PatternType)} {metadata.Request.Pattern.Type} is not supported")
-    };
+    static bool NotImplementedEndpoint(Dictionary<Type, Type> implementations, HttpEndpointMetadata metadata)
+        => metadata.Request.Pattern.Type switch
+        {
+            PatternType.Static when metadata.Response.BodyType == typeof(StreamableResponseMetadata)
+                => !implementations.ContainsKey(StreamableHttpEndpointType.MakeGenericType(metadata.Request.BodyType)),
+            PatternType.Static
+                => !implementations.ContainsKey(HttpEndpointType.MakeGenericType(metadata.Request.BodyType, metadata.Response.BodyType)),
+            PatternType.Parametrized when metadata.Response.BodyType == typeof(StreamableResponseMetadata)
+                => !implementations.ContainsKey(StreamableParametrizedHttpEndpointType.MakeGenericType(metadata.Request.BodyType)),
+            PatternType.Parametrized
+                => !implementations.ContainsKey(ParametrizedHttpEndpointType.MakeGenericType(metadata.Request.BodyType, metadata.Response.BodyType)),
+            _ => throw new NotSupportedException($"{nameof(PatternType)} {metadata.Request.Pattern.Type} is not supported")
+        };
 
-    static IServiceCollection RegisterEndpointsImplementationsIfAllEndpointsImplemented(
+    static IServiceCollection RegisterEndpointsImplementationsIfAllEndpointsImplemented<T>(
         this IServiceCollection services,
-        IEnumerable<HttpEndpointMetadata> nonImplementedMetadatas,
+        IEnumerable<T> nonImplementedMetadatas,
         Dictionary<Type, Type> implementations
     )
         => nonImplementedMetadatas.Any()
@@ -97,8 +112,14 @@ public static class DependencyInjectionExtensions
     };
 
     static async Task HandleRequest(HttpContext context, HttpEndpointMetadata metadata)
-        => await (Task)HttpRequestHandlerType
-            .GetMethod(nameof(HttpRequestHandler.Execute))
-            .MakeGenericMethod(metadata.Request.BodyType, metadata.Response.BodyType)
-            .Invoke(context.RequestServices.GetRequiredService(HttpRequestHandlerType), new object[] { context, metadata });
+    {
+        var (handlerType, arguments) = metadata.Response.BodyType == typeof(StreamableResponseMetadata)
+            ? (StreamableHttpRequestHandlerType, new Type[] { metadata.Request.BodyType })
+            : (HttpRequestHandlerType, new Type[] { metadata.Request.BodyType, metadata.Response.BodyType });
+
+        await (Task)handlerType
+            .GetMethod("Execute")
+            .MakeGenericMethod(arguments)
+            .Invoke(context.RequestServices.GetRequiredService(handlerType), [context, metadata]);
+    }
 }

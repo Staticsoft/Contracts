@@ -4,24 +4,20 @@ using System.Reflection;
 
 namespace Staticsoft.Contracts.ASP;
 
-public class ReflectionHttpEndpointMetadata<RequestBody, ResponseBody> : HttpEndpointMetadata<RequestBody, ResponseBody>
+public class ReflectionHttpEndpointMetadata<RequestBody, ResponseBody>(
+    PropertyInfo property,
+    string basePattern
+) : HttpEndpointMetadata<RequestBody, ResponseBody>
 {
     static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
 
-    readonly PropertyInfo Property;
+    readonly PropertyInfo Property = property;
 
-    public RequestMetadata Request { get; }
-    public ResponseMetadata Response { get; }
+    public RequestMetadata Request { get; } = GetRequestMetadata(property, basePattern);
+    public ResponseMetadata Response { get; } = GetResponseMetadata();
 
     public T GetAttribute<T>() where T : Attribute
         => Property.GetCustomAttribute<T>();
-
-    public ReflectionHttpEndpointMetadata(PropertyInfo property, string basePattern)
-    {
-        Property = property;
-        Request = GetRequestMetadata(property, basePattern);
-        Response = GetResponseMetadata();
-    }
 
     static RequestMetadata GetRequestMetadata(PropertyInfo property, string basePattern)
         => GetRequestMetadata(property, GetPatternType(property), basePattern);

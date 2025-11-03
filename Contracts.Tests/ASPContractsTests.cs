@@ -86,4 +86,19 @@ public class ASPContractsTests : ASPContractsTestsBase
     {
         await API.TestGroup.EmptyEndpointProxy.Execute();
     }
+
+    [Fact]
+    public async Task CanMakeStreamingRequest()
+    {
+        var chunks = new System.Collections.Generic.List<string>();
+        await foreach (var chunk in API.TestGroup.StreamableEndpoint.Execute(new EmptyRequest()))
+        {
+            chunks.Add(chunk);
+        }
+
+        Assert.Equal(3, chunks.Count);
+        Assert.Equal("chunk1", chunks[0]);
+        Assert.Equal("chunk2", chunks[1]);
+        Assert.Equal("chunk3", chunks[2]);
+    }
 }

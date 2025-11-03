@@ -4,65 +4,23 @@ using System.Reflection;
 
 namespace Staticsoft.Contracts.ASP;
 
-public class ReflectionHttpEndpointMetadata<RequestBody, ResponseBody> : HttpEndpointMetadata<RequestBody, ResponseBody>
+public class ReflectionHttpEndpointMetadata<RequestBody, ResponseBody>(
+    PropertyInfo property,
+    string basePattern
+) : HttpEndpointMetadata<RequestBody, ResponseBody>
 {
     static readonly Type ParametrizedHttpEndpointType = typeof(ParametrizedHttpEndpoint<,>);
 
-    readonly PropertyInfo Property;
+    readonly PropertyInfo Property = property;
 
-    public RequestMetadata Request { get; }
-    public ResponseMetadata Response { get; }
-
-    public T GetAttribute<T>() where T : Attribute
-        => Property.GetCustomAttribute<T>();
-
-    public ReflectionHttpEndpointMetadata(PropertyInfo property, string basePattern)
-    {
-        Property = property;
-        Request = GetRequestMetadata(property, basePattern);
-        Response = GetResponseMetadata();
-    }
-
-    static RequestMetadata GetRequestMetadata(PropertyInfo property, string basePattern)
-        => GetRequestMetadata(property, GetPatternType(property), basePattern);
-
-    static RequestMetadata GetRequestMetadata(PropertyInfo property, PatternType patternType, string basePattern) => new()
-    {
-        BodyType = typeof(RequestBody),
-        Pattern = new()
-        {
-            Value = GetPattern(property, basePattern, patternType),
-            Type = patternType
-        }
-    };
-
-    static ResponseMetadata GetResponseMetadata() => new()
+    public RequestMetadata Request { get; } = ReflectionMetadata.BuildRequestMetadata<RequestBody>(property, basePattern, ParametrizedHttpEndpointType);
+    public ResponseMetadata Response { get; } = new()
     {
         BodyType = typeof(ResponseBody)
     };
 
-    static PatternType GetPatternType(PropertyInfo property)
-        => property.PropertyType.GetGenericTypeDefinition() == ParametrizedHttpEndpointType
-        ? PatternType.Parametrized
-        : PatternType.Static;
-
-    static string GetPattern(PropertyInfo property, string basePattern, PatternType type)
-        => $"{basePattern}/{GetEndpointPattern(property, type)}/";
-
-    static string GetEndpointPattern(PropertyInfo property, PatternType type)
-    {
-        var endpoint = property.GetCustomAttribute<EndpointAttribute>();
-        if (endpoint.Pattern != property.Name) return endpoint.Pattern;
-
-        return GetDefaultEndpointPattern(property, type);
-    }
-
-    static string GetDefaultEndpointPattern(PropertyInfo property, PatternType type) => type switch
-    {
-        PatternType.Static => property.Name,
-        PatternType.Parametrized => "{parameter}",
-        _ => throw new NotSupportedException($"{nameof(PatternType)} {type} is not supported")
-    };
+    public T GetAttribute<T>() where T : Attribute
+        => Property.GetCustomAttribute<T>();
 
     public override bool Equals(object obj) => obj switch
     {

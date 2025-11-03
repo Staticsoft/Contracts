@@ -13,7 +13,8 @@ public class TestGroup
         ParametrizedHttpEndpoint<EmptyRequest, RequestParameterResponse> emptyParametrizedEndpoint,
         HttpEndpoint<EmptyRequest, CustomRequestPathResponse> customPathEndpoint,
         NestedGroup nested,
-        HttpEndpoint<EmptyRequest, CustomStatusCodeResponse> customStatusCodeEndpoint
+        HttpEndpoint<EmptyRequest, CustomStatusCodeResponse> customStatusCodeEndpoint,
+        StreamableHttpEndpoint<EmptyRequest> streamingEndpoint
     )
     {
         TestEndpoint = testEndpoint;
@@ -24,6 +25,7 @@ public class TestGroup
         CustomPathEndpoint = customPathEndpoint;
         Nested = nested;
         CustomStatusCodeEndpoint = customStatusCodeEndpoint;
+        StreamableEndpoint = streamingEndpoint;
     }
 
     [Endpoint(HttpMethod.Post)]
@@ -50,4 +52,7 @@ public class TestGroup
     [Endpoint(HttpMethod.Get)]
     [EndpointBehavior(statusCode: 234)]
     public HttpEndpoint<EmptyRequest, CustomStatusCodeResponse> CustomStatusCodeEndpoint { get; }
+
+    [Endpoint(HttpMethod.Get)]
+    public StreamableHttpEndpoint<EmptyRequest> StreamableEndpoint { get; }
 }

@@ -4,11 +4,19 @@ namespace Staticsoft.Contracts.ASP;
 
 public interface HttpEndpointMetadata<RequestBody, ResponseBody> : HttpEndpointMetadata { }
 
+public interface StreamableHttpEndpointMetadata<RequestBody> : StreamableHttpEndpointMetadata { }
+
 public interface HttpEndpointMetadata
 {
     T GetAttribute<T>() where T : Attribute;
     RequestMetadata Request { get; }
     ResponseMetadata Response { get; }
+}
+
+public interface StreamableHttpEndpointMetadata
+{
+    T GetAttribute<T>() where T : Attribute;
+    RequestMetadata Request { get; }
 }
 
 public class RequestMetadata

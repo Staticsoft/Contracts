@@ -12,4 +12,7 @@ public static class HttpEndpointMetadataExtensions
 
     public static bool HasAttribute<T>(this HttpEndpointMetadata metadata) where T : Attribute
         => metadata.GetAttribute<T>() != null;
+
+    public static bool HasAttribute<T>(this StreamableHttpEndpointMetadata metadata) where T : Attribute
+        => metadata.GetAttribute<T>() != null;
 }

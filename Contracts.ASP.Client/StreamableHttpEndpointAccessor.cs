@@ -10,21 +10,21 @@ using System.Text;
 namespace Staticsoft.Contracts.ASP.Client;
 
 public class StreamableHttpEndpointAccessor<RequestBody>(
-    StreamableHttpEndpointMetadata<RequestBody> metadata,
+    HttpEndpointMetadata<RequestBody, StreamableResponseMetadata> metadata,
     EndpointRequestFactory factory,
     HttpClient client
 ) : StreamableHttpEndpoint<RequestBody>,
     StreamableParametrizedHttpEndpoint<RequestBody>
 {
-    readonly StreamableHttpEndpointMetadata Metadata = metadata;
+    readonly HttpEndpointMetadata Metadata = metadata;
     readonly EndpointRequestFactory Factory = factory;
     readonly HttpClient Client = client;
 
     public IAsyncEnumerable<string> Execute(RequestBody body)
-        => ExecuteStreamingRequest(Factory.CreateStreamable(Metadata, Metadata.Request.Pattern.Value, body));
+        => ExecuteStreamingRequest(Factory.Create(Metadata, Metadata.Request.Pattern.Value, body));
 
     public IAsyncEnumerable<string> Execute(string parameter, RequestBody body)
-        => ExecuteStreamingRequest(Factory.CreateStreamable(Metadata, Metadata.Request.Pattern.Value.Replace("{parameter}", parameter), body));
+        => ExecuteStreamingRequest(Factory.Create(Metadata, Metadata.Request.Pattern.Value.Replace("{parameter}", parameter), body));
 
     async IAsyncEnumerable<string> ExecuteStreamingRequest(HttpRequest request)
     {

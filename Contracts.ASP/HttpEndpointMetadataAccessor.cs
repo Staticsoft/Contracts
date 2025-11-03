@@ -14,7 +14,6 @@ public static class HttpEndpointMetadataAccessor
     static readonly Type StreamableHttpEndpointType = typeof(StreamableHttpEndpoint<>);
     static readonly Type StreamableParametrizedHttpEndpointType = typeof(StreamableParametrizedHttpEndpoint<>);
 
-    #region Metadata
     public static IServiceCollection AddMetadata(
         IServiceCollection services,
         IEnumerable<HttpEndpointMetadata> metadata
@@ -37,20 +36,23 @@ public static class HttpEndpointMetadataAccessor
     static IEnumerable<HttpEndpointMetadata> GetMetadata(PropertyInfo property, string basePattern)
         => property.PropertyType.IsGenericTypeOf(HttpEndpointType)
         || property.PropertyType.IsGenericTypeOf(ParametrizedHttpEndpointType)
+        || property.PropertyType.IsGenericTypeOf(StreamableHttpEndpointType)
+        || property.PropertyType.IsGenericTypeOf(StreamableParametrizedHttpEndpointType)
         ? [CreateMetadata(property, basePattern)]
         : GetMetadata(property.PropertyType, $"{basePattern}/{property.Name}");
 
     static HttpEndpointMetadata CreateMetadata(PropertyInfo property, string basePattern)
     {
-        var (requestType, responseType) = GetRequestResponseTypes(property.PropertyType);
+        var types = property.PropertyType.GetGenericArguments();
+        var (requestType, responseType) = types switch
+        {
+            [var request, var response] => (request, response),
+            [var request] => (request, typeof(StreamableResponseMetadata)),
+            _ => throw new NotSupportedException($"Usupported arguments: {string.Join(',', types.AsEnumerable())}")
+        };
+
         return CreateMetadata(property, basePattern, requestType, responseType);
     }
-
-    static (Type, Type) GetRequestResponseTypes(Type type)
-        => GetRequestResponseTypes(type.GetGenericArguments());
-
-    static (Type, Type) GetRequestResponseTypes(Type[] types)
-        => (types.First(), types.Last());
 
     static HttpEndpointMetadata CreateMetadata(PropertyInfo property, string basePattern, Type requestType, Type responseType)
         => typeof(ReflectionHttpEndpointMetadata<,>)
@@ -60,49 +62,6 @@ public static class HttpEndpointMetadataAccessor
 
     static Type MakeHttpEndpointMetadata(HttpEndpointMetadata metadata)
         => typeof(HttpEndpointMetadata<,>).MakeGenericType(metadata.Request.BodyType, metadata.Response.BodyType);
-    #endregion
-
-    #region StreamableMetadata
-    public static IServiceCollection AddStreamableMetadata(
-        IServiceCollection services,
-        IEnumerable<StreamableHttpEndpointMetadata> streamableMetadata
-    )
-    {
-        AssertNoDuplicates(streamableMetadata);
-
-        return streamableMetadata.Aggregate(
-            services,
-            (services, metadata) => services.AddSingleton(MakeStreamableHttpEndpointMetadata(metadata), metadata)
-        );
-    }
-
-    public static IEnumerable<StreamableHttpEndpointMetadata> GetStreamableMetadata(Type type)
-        => GetStreamableMetadata(type, string.Empty);
-
-    static IEnumerable<StreamableHttpEndpointMetadata> GetStreamableMetadata(Type type, string basePattern)
-        => type.GetProperties().SelectMany(property => GetStreamableMetadata(property, basePattern));
-
-    static IEnumerable<StreamableHttpEndpointMetadata> GetStreamableMetadata(PropertyInfo property, string basePattern)
-        => property.PropertyType.IsGenericTypeOf(StreamableHttpEndpointType)
-        || property.PropertyType.IsGenericTypeOf(StreamableParametrizedHttpEndpointType)
-        ? [CreateStreamableMetadata(property, basePattern)]
-        : GetStreamableMetadata(property.PropertyType, $"{basePattern}/{property.Name}");
-
-    static StreamableHttpEndpointMetadata CreateStreamableMetadata(PropertyInfo property, string basePattern)
-    {
-        var requestType = property.PropertyType.GetGenericArguments().Single();
-        return CreateStreamableMetadata(property, basePattern, requestType);
-    }
-
-    static StreamableHttpEndpointMetadata CreateStreamableMetadata(PropertyInfo property, string basePattern, Type requestType)
-        => typeof(ReflectionStreamableHttpEndpointMetadata<>)
-            .MakeGenericType(requestType)
-            .GetConstructor()
-            .Invoke([property, basePattern]) as StreamableHttpEndpointMetadata;
-
-    static Type MakeStreamableHttpEndpointMetadata(StreamableHttpEndpointMetadata metadata)
-        => typeof(StreamableHttpEndpointMetadata<>).MakeGenericType(metadata.Request.BodyType);
-    #endregion
 
     static void AssertNoDuplicates<T>(IEnumerable<T> types)
     {

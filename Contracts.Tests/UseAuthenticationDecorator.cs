@@ -19,15 +19,7 @@ public class UseAuthenticationDecorator : EndpointRequestFactory
     public HttpRequest Create(HttpEndpointMetadata metadata, string path, object body)
         => Create(metadata, Factory.Create(metadata, path, body));
 
-    public HttpRequest CreateStreamable(StreamableHttpEndpointMetadata metadata, string path, object body)
-        => CreateStreamable(metadata, Factory.CreateStreamable(metadata, path, body));
-
     HttpRequest Create(HttpEndpointMetadata metadata, HttpRequest request)
-        => metadata.HasAttribute<AuthenticateRequestAttribute>()
-        ? Decorate(request)
-        : request;
-
-    HttpRequest CreateStreamable(StreamableHttpEndpointMetadata metadata, HttpRequest request)
         => metadata.HasAttribute<AuthenticateRequestAttribute>()
         ? Decorate(request)
         : request;

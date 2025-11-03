@@ -5,6 +5,6 @@ namespace Staticsoft.Contracts.ASP.Server;
 
 public interface StreamableHttpRequestHandler
 {
-    Task Execute<RequestBody>(HttpContext context, StreamableHttpEndpointMetadata metadata)
+    Task Execute<RequestBody>(HttpContext context, HttpEndpointMetadata metadata)
         where RequestBody : class, new();
 }

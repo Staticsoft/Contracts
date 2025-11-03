@@ -23,14 +23,10 @@ public static class DependencyInjectionExtensions
             .AddSingleton(StreamableParametrizedHttpEndpointType, typeof(StreamableHttpEndpointAccessor<>))
             .AddSingleton<HttpResultHandler, StatusCodeResultHandler>()
             .AddSingleton<EndpointRequestFactory, HttpEndpointRequestFactory>()
-            .AddMetadata(HttpEndpointMetadataAccessor.GetMetadata(typeof(TAPI)))
-            .AddStreamableMetadata(HttpEndpointMetadataAccessor.GetStreamableMetadata(typeof(TAPI)));
+            .AddMetadata(HttpEndpointMetadataAccessor.GetMetadata(typeof(TAPI)));
 
     static IServiceCollection AddMetadata(this IServiceCollection services, IEnumerable<HttpEndpointMetadata> metadata)
         => HttpEndpointMetadataAccessor.AddMetadata(services, metadata);
-
-    static IServiceCollection AddStreamableMetadata(this IServiceCollection services, IEnumerable<StreamableHttpEndpointMetadata> metadata)
-        => HttpEndpointMetadataAccessor.AddStreamableMetadata(services, metadata);
 
     static IServiceCollection AddGroups<TAPI>(this IServiceCollection services)
         => GetGroupTypes(typeof(TAPI)).Aggregate(services, (services, type) => services.AddSingleton(type));

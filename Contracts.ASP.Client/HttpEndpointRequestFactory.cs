@@ -12,9 +12,6 @@ public class HttpEndpointRequestFactory(
     public HttpRequest Create(HttpEndpointMetadata metadata, string path, object body)
         => Create(metadata.GetAttribute<EndpointAttribute>().Method, path, body);
 
-    public HttpRequest CreateStreamable(StreamableHttpEndpointMetadata metadata, string path, object body)
-        => Create(metadata.GetAttribute<EndpointAttribute>().Method, path, body);
-
     HttpRequest Create(HttpMethod method, string path, object body) => body switch
     {
         EmptyRequest => Factory.Create(method, path),

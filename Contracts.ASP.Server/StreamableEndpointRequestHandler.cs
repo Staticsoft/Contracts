@@ -23,7 +23,7 @@ public class StreamableEndpointRequestHandler : StreamableHttpRequestHandler
         => (Serializer, Endpoint, ParametrizedEndpoint)
         = (serializer, endpoint, parametrizedEndpoint);
 
-    public async Task Execute<RequestBody>(HttpContext context, StreamableHttpEndpointMetadata metadata)
+    public async Task Execute<RequestBody>(HttpContext context, HttpEndpointMetadata metadata)
         where RequestBody : class, new()
     {
         var request = await ReadRequest<RequestBody>(context);
@@ -41,7 +41,7 @@ public class StreamableEndpointRequestHandler : StreamableHttpRequestHandler
 
     async IAsyncEnumerable<string> ExecuteStreamingRequest<RequestBody>(
         RequestBody request,
-        StreamableHttpEndpointMetadata metadata,
+        HttpEndpointMetadata metadata,
         HttpContext context
     )
     {
@@ -64,11 +64,11 @@ public class StreamableEndpointRequestHandler : StreamableHttpRequestHandler
     IAsyncEnumerable<string> ExecuteParametrizedStreamingRequest<RequestBody>(
         RequestBody request,
         HttpContext context,
-        StreamableHttpEndpointMetadata metadata
+        HttpEndpointMetadata metadata
     )
         => ParametrizedEndpoint.Resolve<RequestBody>().Execute(GetParameter(context.Request.Path, metadata), request);
 
-    static string GetParameter(string requestPath, StreamableHttpEndpointMetadata metadata)
+    static string GetParameter(string requestPath, HttpEndpointMetadata metadata)
     {
         var sections = metadata.Request.Pattern.Value.Split('/').Select((section, index) => new { Value = section, Index = index });
         var parameterSection = sections.Single(section => section.Value == "{parameter}");

@@ -22,14 +22,13 @@ public class CustomStatusCodeASPContractsTests : ASPContractsTestsBase
     }
 }
 
-public class CustomStatusCodeResultHandler : HttpResultHandler
+public class CustomStatusCodeResultHandler(
+    HttpResultHandler handler
+) : HttpResultHandler
 {
-    readonly HttpResultHandler Handler;
+    readonly HttpResultHandler Handler = handler;
 
     public int ExpectedStatusCode = 200;
-
-    public CustomStatusCodeResultHandler(HttpResultHandler handler)
-        => Handler = handler;
 
     public TResponse Handle<TResponse>(HttpResult<TResponse> result)
     {

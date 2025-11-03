@@ -2,11 +2,9 @@
 
 namespace Staticsoft.Contracts.Abstractions;
 
-public class HttpResultHandlerException : Exception
+public class HttpResultHandlerException(
+    int statusCode
+) : Exception($"Unexpected status code received: {statusCode}")
 {
-    public readonly int StatusCode;
-
-    public HttpResultHandlerException(int statusCode)
-        : base($"Unexpected status code received: {statusCode}")
-        => StatusCode = statusCode;
+    public readonly int StatusCode = statusCode;
 }

@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 
 namespace Staticsoft.TestServer;
 
-public class AuthenticateRequestsDecorator : HttpRequestHandler
+public class AuthenticateRequestsDecorator(
+    HttpRequestHandler handler
+) : HttpRequestHandler
 {
-    readonly HttpRequestHandler Handler;
-
-    public AuthenticateRequestsDecorator(HttpRequestHandler handler)
-        => Handler = handler;
+    readonly HttpRequestHandler Handler = handler;
 
     public Task Execute<RequestBody, ResponseBody>(HttpContext context, HttpEndpointMetadata metadata)
         where RequestBody : class, new()
@@ -35,5 +34,4 @@ public class AuthenticateRequestsDecorator : HttpRequestHandler
         => context.Request.Headers.TryGetValue("Authentication", out var values)
         ? values.Single()
         : string.Empty;
-
 }

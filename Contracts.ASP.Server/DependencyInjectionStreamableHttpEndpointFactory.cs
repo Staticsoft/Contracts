@@ -4,12 +4,11 @@ using System;
 
 namespace Staticsoft.Contracts.ASP.Server;
 
-public class DependencyInjectionStreamableHttpEndpointFactory : StreamableHttpEndpointFactory
+public class DependencyInjectionStreamableHttpEndpointFactory(
+    IServiceProvider provider
+) : StreamableHttpEndpointFactory
 {
-    readonly IServiceProvider Provider;
-
-    public DependencyInjectionStreamableHttpEndpointFactory(IServiceProvider provider)
-        => Provider = provider;
+    readonly IServiceProvider Provider = provider;
 
     public StreamableHttpEndpoint<RequestBody> Resolve<RequestBody>()
         => Provider.GetRequiredService<StreamableHttpEndpoint<RequestBody>>();

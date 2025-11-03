@@ -5,16 +5,13 @@ using Staticsoft.TestContract;
 
 namespace Staticsoft.Contracts.Tests;
 
-public class UseAuthenticationDecorator : EndpointRequestFactory
+public class UseAuthenticationDecorator(
+    EndpointRequestFactory factory,
+    Authentication authentication
+) : EndpointRequestFactory
 {
-    readonly EndpointRequestFactory Factory;
-    readonly Authentication Authentication;
-
-    public UseAuthenticationDecorator(EndpointRequestFactory factory, Authentication authentication)
-    {
-        Factory = factory;
-        Authentication = authentication;
-    }
+    readonly EndpointRequestFactory Factory = factory;
+    readonly Authentication Authentication = authentication;
 
     public HttpRequest Create(HttpEndpointMetadata metadata, string path, object body)
         => Create(metadata, Factory.Create(metadata, path, body));

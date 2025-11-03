@@ -4,12 +4,11 @@ using System.Threading.Tasks;
 
 namespace Staticsoft.TestServer;
 
-public class EmptyEndpointHandlerProxy : HttpEndpoint<EmptyRequestProxy, EmptyResponse>
+public class EmptyEndpointHandlerProxy(
+    HttpEndpoint<EmptyRequest, EmptyResponse> endpoint
+) : HttpEndpoint<EmptyRequestProxy, EmptyResponse>
 {
-    readonly HttpEndpoint<EmptyRequest, EmptyResponse> Endpoint;
-
-    public EmptyEndpointHandlerProxy(HttpEndpoint<EmptyRequest, EmptyResponse> endpoint)
-        => Endpoint = endpoint;
+    readonly HttpEndpoint<EmptyRequest, EmptyResponse> Endpoint = endpoint;
 
     public Task<EmptyResponse> Execute(EmptyRequestProxy request)
         => Endpoint.Execute(request);

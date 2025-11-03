@@ -32,13 +32,12 @@ public class StreamableHttpEndpointAccessor<RequestBody>(
         using var stream = await response.Content.ReadAsStreamAsync();
         using var reader = new StreamReader(stream, Encoding.UTF8);
 
-        while (!reader.EndOfStream)
+        var buffer = new char[1024];
+        var bytesRead = 0;
+
+        while ((bytesRead = await reader.ReadAsync(buffer, 0, buffer.Length)) > 0)
         {
-            var line = await reader.ReadLineAsync();
-            if (!string.IsNullOrEmpty(line))
-            {
-                yield return line;
-            }
+            yield return new string(buffer, 0, bytesRead);
         }
     }
 

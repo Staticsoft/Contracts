@@ -1,5 +1,8 @@
-﻿namespace Staticsoft.TestContract;
+﻿using Staticsoft.Contracts.Abstractions;
 
+namespace Staticsoft.TestContract;
+
+[ApiRoot]
 public class TestAPI(
     TestGroup testGroup,
     GroupWithSameEndpointName sameEndpointNameGroup

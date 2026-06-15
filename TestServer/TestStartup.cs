@@ -4,14 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Staticsoft.Contracts.ASP.Server;
 using Staticsoft.Serialization.Net;
 using Staticsoft.TestContract;
-using System.Reflection;
 
 namespace Staticsoft.TestServer;
 
 public class TestStartup
 {
     public void ConfigureServices(IServiceCollection services) => services
-        .UseServerAPI<TestAPI>(Assembly.GetExecutingAssembly())
+        .UseServerAPI<TestAPI>(new TestAPIEndpointRegistrations())
         .Decorate<HttpRequestHandler, AuthenticateRequestsDecorator>()
         .AddHttpContextAccessor()
         .UseSystemJsonSerializer();

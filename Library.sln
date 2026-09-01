@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.ASP.Server", "Con
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.ASP.Client", "Contracts.ASP.Client\Contracts.ASP.Client.csproj", "{BC2D782C-C49F-4EE7-A0BA-92660D009F81}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts.ASP.Server.Generator", "Contracts.ASP.Server.Generator\Contracts.ASP.Server.Generator.csproj", "{507AA5E7-67E2-4CBE-AE01-56B3B884BADE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{BC2D782C-C49F-4EE7-A0BA-92660D009F81}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC2D782C-C49F-4EE7-A0BA-92660D009F81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC2D782C-C49F-4EE7-A0BA-92660D009F81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{507AA5E7-67E2-4CBE-AE01-56B3B884BADE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{507AA5E7-67E2-4CBE-AE01-56B3B884BADE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{507AA5E7-67E2-4CBE-AE01-56B3B884BADE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{507AA5E7-67E2-4CBE-AE01-56B3B884BADE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
